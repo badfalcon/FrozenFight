@@ -1,5 +1,5 @@
 name: SnowBallBattle
-main: com.gmail.badfalcon610.SnowBallBattle.SnowBallBattle
+main: com.github.badfalcon.SnowBallBattle.SnowBallBattle
 version: 0.1
 commands:
    sbb:

@@ -36,6 +36,7 @@ public class SnowListener implements Listener {
 
 	@EventHandler
 	public void onPluginEnable(PluginEnableEvent event) {
+		board = manager.getNewScoreboard();
 		String[] steams = (String[]) plugin.getConfig()
 				.getStringList("Team.TeamNames").toArray(new String[0]);
 		String[] teamcolors = (String[]) plugin.getConfig()
@@ -56,15 +57,21 @@ public class SnowListener implements Listener {
 					+ steams[i]));
 			score[i].setScore(0);
 		}
+		for(Player player:Bukkit.getOnlinePlayers()){
+			PlayerJoinTeam(player);
+		}
 	}
 
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent event) {
+		PlayerJoinTeam(event.getPlayer());
+	}
+	
+	public void PlayerJoinTeam(Player player) {
 		List<String> spectatorstringlist = plugin.getConfig().getStringList(
 				"Game.Spectators");
-		Player joined = event.getPlayer();
-		joined.setScoreboard(board);
-		if (!spectatorstringlist.contains(joined.getName())) {
+		player.setScoreboard(board);
+		if (!spectatorstringlist.contains(player.getName())) {
 			while (true) {
 				String[] teams = plugin.getConfig()
 						.getStringList("Team.TeamNames").toArray(new String[0]);
@@ -80,22 +87,23 @@ public class SnowListener implements Listener {
 					Team jointeam = board.getTeam(teams[teamnumber]);
 					if (jointeam.getSize() < plugin.getConfig().getInt(
 							"Team.MaxPlayers")) {
-						jointeam.addPlayer(joined);
+						jointeam.addPlayer(player);
 						String[] teamcolors = plugin.getConfig()
 								.getStringList("Team.TeamColors")
 								.toArray(new String[0]);
-						joined.sendMessage(ChatColor
+						player.sendMessage(ChatColor
 								.translateAlternateColorCodes('&', "&Rあなたはチーム："
 										+ teamcolors[teamnumber]
 										+ jointeam.getName().toString()
 										+ "&Rへ参加しました。"));
 						Score person = board.getObjective("personalscore")
-								.getScore(joined);
+								.getScore(player);
 						person.setScore(0);
 						break;
 					}
 				} else {
 					plugin.getLogger().info("人数が上限を超えました。");
+					break;
 				}
 			}
 		}
