@@ -1,7 +1,5 @@
 package com.github.badfalcon.SnowBallBattle;
 
-import java.util.List;
-
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -22,10 +20,8 @@ public class SnowTask extends BukkitRunnable {
 		ItemStack[] clear = { new ItemStack(Material.AIR),
 				new ItemStack(Material.AIR), new ItemStack(Material.AIR),
 				new ItemStack(Material.AIR) };
-		List<String> spectatorstringlist = plugin.getConfig().getStringList(
-				"Game.Spectators");
 		for (Player player : players) {
-			if (!spectatorstringlist.contains(player.getName())) {
+			if (!player.getMetadata("spectator").get(0).asBoolean()) {
 				player.getInventory().setArmorContents(clear);
 				player.getInventory().clear();
 			}

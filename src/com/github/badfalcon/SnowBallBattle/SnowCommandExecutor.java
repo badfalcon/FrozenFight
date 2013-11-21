@@ -1,7 +1,6 @@
 package com.github.badfalcon.SnowBallBattle;
 
-import java.util.List;
-
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -15,6 +14,7 @@ import org.bukkit.scheduler.BukkitTask;
 public class SnowCommandExecutor implements CommandExecutor {
 
 	private SnowBallBattle plugin;
+	BukkitTask game;
 
 	public SnowCommandExecutor(SnowBallBattle plugin) {
 		this.plugin = plugin;
@@ -56,42 +56,27 @@ public class SnowCommandExecutor implements CommandExecutor {
 								"Game.SnowBallStacks"); i++) {
 							sb[i] = new ItemStack(Material.SNOW_BALL, 16);
 						}
-						String[] teams = plugin.getConfig()
-								.getStringList("Team.TeamNames")
-								.toArray(new String[0]);
-						List<String> spectatorstringlist = plugin.getConfig()
-								.getStringList("Game.Spectators");
 						for (Player player1 : players) {
-							if (!spectatorstringlist
-									.contains(player1.getName())) {
+							if (!player1.getMetadata("spectator").get(0).asBoolean()) {
 								if(player1.getGameMode().equals(GameMode.CREATIVE)){
 									player1.setGameMode(GameMode.SURVIVAL);
 								}
 								player1.setFoodLevel(20);
-								int teamnumber = 0;
-								for (int i = 0; i < teams.length; i++) {
-									if (player1.getScoreboard()
-											.getPlayerTeam(player1).getName()
-											.equals(teams[i])) {
-										teamnumber = i;
-										player1.sendMessage("teamnumber = "
-												+ teamnumber);
-										break;
-									}
-								}
+								int teamnumber = player1.getMetadata("teamnumber").get(0).asInt();
 								player1.getInventory().clear();
 								player1.getInventory().setArmorContents(
 										armor[teamnumber]);
 								player1.getInventory().setContents(sb);
 							}
 						}
-						BukkitTask game = new SnowTask(this.plugin)
+						game = new SnowTask(this.plugin)
 								.runTaskLater(this.plugin, 20 * 60 * plugin
 										.getConfig().getInt("Game.GameTime"));
 						return true;
 					case "stop":
-						if (ingame == true) {
-							// plugin.getScheduler().cancelTask(game.getTaskId());
+						if (game != null) {
+							Bukkit.getServer().getScheduler().cancelTask(game.getTaskId());
+							game = new SnowTask(this.plugin).runTask(plugin);
 						}
 					default:
 						return false;

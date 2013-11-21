@@ -4,17 +4,17 @@ import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
-import org.bukkit.entity.Snowball;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.server.PluginEnableEvent;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
@@ -57,7 +57,7 @@ public class SnowListener implements Listener {
 					+ steams[i]));
 			score[i].setScore(0);
 		}
-		for(Player player:Bukkit.getOnlinePlayers()){
+		for (Player player : Bukkit.getOnlinePlayers()) {
 			PlayerJoinTeam(player);
 		}
 	}
@@ -66,7 +66,7 @@ public class SnowListener implements Listener {
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		PlayerJoinTeam(event.getPlayer());
 	}
-	
+
 	public void PlayerJoinTeam(Player player) {
 		List<String> spectatorstringlist = plugin.getConfig().getStringList(
 				"Game.Spectators");
@@ -75,6 +75,9 @@ public class SnowListener implements Listener {
 			while (true) {
 				String[] teams = plugin.getConfig()
 						.getStringList("Team.TeamNames").toArray(new String[0]);
+				String[] teamcolors = plugin.getConfig()
+						.getStringList("Team.TeamColors")
+						.toArray(new String[0]);
 				int fullteams = 0;
 				for (String team : teams) {
 					if (board.getTeam(team).getSize() == plugin.getConfig()
@@ -88,9 +91,13 @@ public class SnowListener implements Listener {
 					if (jointeam.getSize() < plugin.getConfig().getInt(
 							"Team.MaxPlayers")) {
 						jointeam.addPlayer(player);
-						String[] teamcolors = plugin.getConfig()
-								.getStringList("Team.TeamColors")
-								.toArray(new String[0]);
+						player.setMetadata("team", new FixedMetadataValue(
+								plugin, teams[teamnumber]));
+						player.setMetadata("teamnumber",
+								new FixedMetadataValue(plugin, teamnumber));
+						player.setMetadata("teamcolor", new FixedMetadataValue(
+								plugin, teamcolors[teamnumber]));
+						player.setMetadata("spectator", new FixedMetadataValue(plugin, false));
 						player.sendMessage(ChatColor
 								.translateAlternateColorCodes('&', "&Rあなたはチーム："
 										+ teamcolors[teamnumber]
@@ -106,6 +113,8 @@ public class SnowListener implements Listener {
 					break;
 				}
 			}
+		}else{
+			player.setMetadata("spectator", new FixedMetadataValue(plugin, true));
 		}
 	}
 
@@ -126,8 +135,26 @@ public class SnowListener implements Listener {
 			placer.sendMessage("置けません。");
 		}
 	}
-
+	
 	@EventHandler
+	public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
+		if(event.getDamager().getType() == EntityType.SNOWBALL){
+			Projectile projectile = (Projectile)event.getDamager();
+			Player shooter = (Player)projectile.getShooter();
+			Player hitPlayer = (Player)event.getEntity();
+			if(!shooter.getName().equals(hitPlayer.getName()) && !shooter.getMetadata("team").get(0).asString().equals(hitPlayer.getMetadata("team").get(0).asString())){
+				Score person = board.getObjective("personalscore").getScore(shooter);
+				Score team = board.getObjective("score").getScore(
+								Bukkit.getOfflinePlayer(ChatColor.translateAlternateColorCodes('&',shooter.getMetadata("teamcolor").get(0).asString()+ shooter.getMetadata("team").get(0).asString())));
+				person.setScore(person.getScore() + 1);
+				team.setScore(team.getScore() + 1);
+				hitPlayer.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
+			}
+		}
+		event.setCancelled(true);
+	}
+
+/*	@EventHandler
 	public void onProjectileHit(ProjectileHitEvent event) {
 		Projectile projectile = event.getEntity();
 		if (projectile instanceof Snowball) {
@@ -167,5 +194,5 @@ public class SnowListener implements Listener {
 				// hitnearentity.get(0).playEffect(EntityEffect.HURT);
 			}
 		}
-	}
+	}*/
 }

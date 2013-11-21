@@ -7,8 +7,6 @@ public class SnowBallBattle extends JavaPlugin {
 
 	private SnowCommandExecutor snowExecutor;
 
-	String[] teamcolors = new String[0];
-	
 	@Override
 	public void onEnable() {
 		snowExecutor = new SnowCommandExecutor(this);
