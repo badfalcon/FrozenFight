@@ -1,0 +1,17 @@
+# default config.yml
+Team:
+  MaxPlayers: 1
+  TeamNames:
+    - Red
+    - Blue
+  TeamColors:
+    - "&C"
+    - "&9"
+  TeamArmor:
+    - IRON
+    - DIAMOND
+Game:
+  SnowBallStacks: 5
+  GameTime: 5
+  Spectators:
+    - punsuke
