@@ -97,7 +97,8 @@ public class SnowListener implements Listener {
 								new FixedMetadataValue(plugin, teamnumber));
 						player.setMetadata("teamcolor", new FixedMetadataValue(
 								plugin, teamcolors[teamnumber]));
-						player.setMetadata("spectator", new FixedMetadataValue(plugin, false));
+						player.setMetadata("spectator", new FixedMetadataValue(
+								plugin, false));
 						player.sendMessage(ChatColor
 								.translateAlternateColorCodes('&', "&Rあなたはチーム："
 										+ teamcolors[teamnumber]
@@ -113,8 +114,9 @@ public class SnowListener implements Listener {
 					break;
 				}
 			}
-		}else{
-			player.setMetadata("spectator", new FixedMetadataValue(plugin, true));
+		} else {
+			player.setMetadata("spectator",
+					new FixedMetadataValue(plugin, true));
 		}
 	}
 
@@ -135,64 +137,36 @@ public class SnowListener implements Listener {
 			placer.sendMessage("置けません。");
 		}
 	}
-	
+
 	@EventHandler
 	public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
-		if(event.getDamager().getType() == EntityType.SNOWBALL){
-			Projectile projectile = (Projectile)event.getDamager();
-			Player shooter = (Player)projectile.getShooter();
-			Player hitPlayer = (Player)event.getEntity();
-			if(!shooter.getName().equals(hitPlayer.getName()) && !shooter.getMetadata("team").get(0).asString().equals(hitPlayer.getMetadata("team").get(0).asString())){
-				Score person = board.getObjective("personalscore").getScore(shooter);
+		if (event.getDamager().getType() == EntityType.SNOWBALL) {
+			Projectile projectile = (Projectile) event.getDamager();
+			Player shooter = (Player) projectile.getShooter();
+			Player hitPlayer = (Player) event.getEntity();
+			if (!shooter.getName().equals(hitPlayer.getName())
+					&& !shooter
+							.getMetadata("team")
+							.get(0)
+							.asString()
+							.equals(hitPlayer.getMetadata("team").get(0)
+									.asString())) {
+				Score person = board.getObjective("personalscore").getScore(
+						shooter);
 				Score team = board.getObjective("score").getScore(
-								Bukkit.getOfflinePlayer(ChatColor.translateAlternateColorCodes('&',shooter.getMetadata("teamcolor").get(0).asString()+ shooter.getMetadata("team").get(0).asString())));
+						Bukkit.getOfflinePlayer(ChatColor
+								.translateAlternateColorCodes('&', shooter
+										.getMetadata("teamcolor").get(0)
+										.asString()
+										+ shooter.getMetadata("team").get(0)
+												.asString())));
 				person.setScore(person.getScore() + 1);
 				team.setScore(team.getScore() + 1);
-				hitPlayer.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
+				hitPlayer
+						.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
 			}
 		}
 		event.setCancelled(true);
 	}
 
-/*	@EventHandler
-	public void onProjectileHit(ProjectileHitEvent event) {
-		Projectile projectile = event.getEntity();
-		if (projectile instanceof Snowball) {
-			List<Entity> hitnearentity = projectile.getNearbyEntities(0.5, 1.0,
-					0.5);
-			if (hitnearentity.size() != 0) {
-				Player shooter = (Player) projectile.getShooter();
-				String[] teams = plugin.getConfig()
-						.getStringList("Team.TeamNames").toArray(new String[0]);
-				int shooterteamnum = 0;
-				for (int i = 0; i < teams.length; i++) {
-					if (teams[i].equals(board.getPlayerTeam(shooter).getName())) {
-						shooterteamnum = i;
-					}
-				}
-				Player hitPlayer = (Player) hitnearentity.get(0);
-				if (!board.getPlayerTeam(shooter).getName()
-						.equals(board.getPlayerTeam(hitPlayer).getName())) {
-					Score person = board.getObjective("personalscore")
-							.getScore(shooter);
-					Score team = board
-							.getObjective("score")
-							.getScore(
-									Bukkit.getOfflinePlayer(ChatColor
-											.translateAlternateColorCodes(
-													'&',
-													plugin.getConfig()
-															.getStringList(
-																	"Team.TeamColors")
-															.toArray(
-																	new String[0])[shooterteamnum])
-											+ board.getPlayerTeam(shooter)
-													.getName()));
-					person.setScore(person.getScore() + 1);
-					team.setScore(team.getScore() + 1);
-				}
-				// hitnearentity.get(0).playEffect(EntityEffect.HURT);
-			}
-		}
-	}*/
 }
