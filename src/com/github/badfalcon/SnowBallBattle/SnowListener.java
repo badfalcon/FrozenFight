@@ -4,14 +4,20 @@ import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -59,6 +65,9 @@ public class SnowListener implements Listener {
 		}
 		for (Player player : Bukkit.getOnlinePlayers()) {
 			PlayerJoinTeam(player);
+			player.removeMetadata("loc1", plugin);
+			player.removeMetadata("loc2", plugin);
+			player.removeMetadata("locset", plugin);
 		}
 	}
 
@@ -135,6 +144,53 @@ public class SnowListener implements Listener {
 		if (!placer.isOp()) {
 			event.setCancelled(true);
 			placer.sendMessage("置けません。");
+		}
+	}
+
+	@EventHandler
+	public void onProjectileLaunch(ProjectileLaunchEvent event) {
+		if (event.getEntityType() == EntityType.SNOWBALL) {
+			Player shooter = (Player) event.getEntity().getShooter();
+			event.getEntity().setMetadata("Shooter",
+					new FixedMetadataValue(plugin, shooter.getName()));
+		}
+	}
+
+	@EventHandler
+	public void onPlayerInteract(PlayerInteractEvent event) {
+		Player player = event.getPlayer();
+		if (event.getAction() == Action.RIGHT_CLICK_BLOCK
+				&& player.getItemInHand().getType() == Material.WOOD_AXE) {
+			Location loc = event.getClickedBlock().getLocation();
+			if (loc != null){
+				
+			}
+			if (player.hasMetadata("locset")) {
+		
+				if (player.getMetadata("locset").get(0).asInt() == 1) {
+					player.setMetadata("loc2", new FixedMetadataValue(plugin,
+							loc));
+					player.setMetadata("locset", new FixedMetadataValue(plugin,
+							2));
+					Bukkit.getServer().broadcastMessage(
+							loc.getX() + "," + loc.getX() + "," + loc.getX()
+									+ "をスロット２に記録しました。");
+				} else {
+					player.setMetadata("loc1", new FixedMetadataValue(plugin,
+							loc));
+					player.setMetadata("locset", new FixedMetadataValue(plugin,
+							1));
+					Bukkit.getServer().broadcastMessage(
+							loc.getX() + "," + loc.getX() + "," + loc.getX()
+									+ "をスロット１に記録しました。");
+				}
+			} else {
+				player.setMetadata("loc1", new FixedMetadataValue(plugin, loc));
+				player.setMetadata("locset", new FixedMetadataValue(plugin, 1));
+				Bukkit.getServer().broadcastMessage(
+						loc.getX() + "," + loc.getX() + "," + loc.getX()
+								+ "をスロット１に記録しました。");
+			}
 		}
 	}
 

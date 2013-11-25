@@ -1,4 +1,6 @@
 # default config.yml
+Area:
+  SelectItemID: 
 Team:
   MaxPlayers: 1
   TeamNames:
