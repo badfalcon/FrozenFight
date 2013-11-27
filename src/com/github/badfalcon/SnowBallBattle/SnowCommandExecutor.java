@@ -35,10 +35,10 @@ public class SnowCommandExecutor implements CommandExecutor {
 					player.sendMessage("パラメータが足りません。");
 					return false;
 				} else {
-					switch (args[0]) {
-					case "setspawn":
-						if (!player.hasMetadata("loc1")
-								|| !player.hasMetadata("loc2")) {
+					Player[] players = plugin.getServer().getOnlinePlayers();
+					if (args[0].equals("setspawn")) {
+						if (!player.hasMetadata("loc1x")
+								|| !player.hasMetadata("loc2x")) {
 							sender.sendMessage("範囲がスロットに記録されていません。");
 							return false;
 						} else {
@@ -46,39 +46,84 @@ public class SnowCommandExecutor implements CommandExecutor {
 								player.sendMessage("チーム名が与えられていません。");
 								return false;
 							} else {
-								Location loc1 = (Location) player.getMetadata(
-										"loc1").get(0);
-								Location loc2 = (Location) player.getMetadata(
-										"loc2").get(0);
-								if ((int) loc1.getY() != (int) loc2.getY()) {
-									player.sendMessage("高さが異なっています。");
-									return false;
-								} else if (loc1.getX() > loc2.getX()) {
-									loc1.setX(loc1.getX() + loc2.getX());
-									loc2.setX(loc1.getX() - loc2.getX());
-									loc1.setX(loc1.getX() - loc2.getX());
-								} else if (loc1.getY() > loc2.getY()) {
-									loc1.setY(loc1.getX() + loc2.getY());
-									loc2.setY(loc1.getX() - loc2.getY());
-									loc1.setY(loc1.getX() - loc2.getY());
-								}
 								World world = Bukkit.getServer().getWorlds()
 										.get(0);
-								world.setMetadata(args[1] + "res1",
-										new FixedMetadataValue(plugin, loc1));
-								world.setMetadata(args[1] + "res2",
-										new FixedMetadataValue(plugin, loc2));
+								double loc1x = player.getMetadata("loc1x")
+										.get(0).asDouble();
+								double loc1y = player.getMetadata("loc1y")
+										.get(0).asDouble();
+								double loc1z = player.getMetadata("loc1z")
+										.get(0).asDouble();
+								double loc2x = player.getMetadata("loc2x")
+										.get(0).asDouble();
+								double loc2y = player.getMetadata("loc2y")
+										.get(0).asDouble();
+								double loc2z = player.getMetadata("loc2z")
+										.get(0).asDouble();
+								if ((int) loc1y != (int) loc2y) {
+									player.sendMessage("高さが異なっています。");
+									return false;
+								} else if (loc1x > loc2x) {
+									loc1x = loc1x + loc2x;
+									loc2x = loc1x - loc2x;
+									loc1x = loc1x - loc2x;
+								} else if (loc1z > loc2z) {
+									loc1z = loc1z + loc2z;
+									loc2z = loc1z - loc2z;
+									loc1z = loc1z - loc2z;
+								}
+								world.setMetadata(args[1] + "res1x",
+										new FixedMetadataValue(plugin, loc1x));
+								world.setMetadata(args[1] + "res1y",
+										new FixedMetadataValue(plugin, loc1y));
+								world.setMetadata(args[1] + "res1z",
+										new FixedMetadataValue(plugin, loc1z));
+								world.setMetadata(args[1] + "res2x",
+										new FixedMetadataValue(plugin, loc2x));
+								world.setMetadata(args[1] + "res2y",
+										new FixedMetadataValue(plugin, loc2y));
+								world.setMetadata(args[1] + "res2z",
+										new FixedMetadataValue(plugin, loc2z));
 								player.sendMessage(args[1] + "のリスポーン地点を\nX:"
-										+ loc1.getX() + "~" + loc2.getX()
-										+ "\nY" + loc1.getX() + "~"
-										+ loc2.getZ() + "に設定しました。");
+										+ loc1x + "~" + loc2x
+										+ "\nZ" + loc1z + "~"
+										+ loc2z + "に設定しました。");
 							}
 						}
-					case "start":
+					} else if (args[0].equals("ready")) {
+						World world = Bukkit.getServer().getWorlds().get(0);
+						for (Player player1 : players) {
+							if (!player1.getMetadata("spectator").get(0)
+									.asBoolean()) {
+								String team = player1.getMetadata("team")
+										.get(0).asString();
+								double loc1x =  world
+										.getMetadata(team + "res1x").get(0).asDouble();
+								double loc1y =  world
+										.getMetadata(team + "res1y").get(0).asDouble();
+								double loc1z =  world
+										.getMetadata(team + "res1z").get(0).asDouble();
+								double loc2x = world
+										.getMetadata(team + "res2x").get(0).asDouble();
+//								double loc2y = world
+//										.getMetadata(team + "res2y").get(0).asDouble();
+								double loc2z = world
+										.getMetadata(team + "res2z").get(0).asDouble();
+								double spawnx = loc1x
+										+ Math.random()
+										* (loc2x - loc1x);
+								double spawny = loc1y + 1;
+								double spawnz = loc1z
+										+ Math.random()
+										* (loc2z - loc1z);
+								Location respawn = new Location(world,spawnx,spawny,spawnz);
+								player1.setBedSpawnLocation(respawn);
+								player1.teleport(respawn);
+							}
+						}
+					} else if (args[0].equals("start")) {
 						ingame = true;
 						plugin.getServer().broadcastMessage("ゲームを開始します。");
-						Player[] players = plugin.getServer()
-								.getOnlinePlayers();
 						ItemStack[] sb = new ItemStack[36];
 						String[] configarmor = plugin.getConfig()
 								.getStringList("Team.TeamArmor")
@@ -120,15 +165,23 @@ public class SnowCommandExecutor implements CommandExecutor {
 								this.plugin, 20 * 60 * plugin.getConfig()
 										.getInt("Game.GameTime"));
 						return true;
-					case "stop":
+					}else if(args[0].equals("stop")){
 						if (game != null) {
 							Bukkit.getServer().getScheduler()
 									.cancelTask(game.getTaskId());
 							game = new SnowTask(this.plugin).runTask(plugin);
 						}
-					default:
+					}else{
 						return false;
 					}
+/*					switch (args[0]) {
+					case "setspawn":
+					case "ready":
+					case "start":
+					case "stop":
+					default:
+						return false;
+					}*/
 				}
 			}
 			return false;

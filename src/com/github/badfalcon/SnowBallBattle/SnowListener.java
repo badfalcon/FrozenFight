@@ -109,14 +109,6 @@ public class SnowListener implements Listener {
 								plugin, teamcolors[teamnumber]));
 						player.setMetadata("spectator", new FixedMetadataValue(
 								plugin, false));
-						Location location1 = (Location)world.getMetadata(jointeam.getName().toString() + "").get(0);
-						Location location2 = (Location)world.getMetadata(jointeam.getName().toString() + "").get(0);
-						double spawnx = location1.getX() + Math.random() * (location2.getX() - location1.getX());
-						double spawnz = location1.getZ() + Math.random() * (location2.getZ() - location1.getZ());
-						Location respawn = location1;
-						respawn.setX(spawnx);
-						respawn.setZ(spawnz);
-						player.setBedSpawnLocation(respawn);
 						player.sendMessage(ChatColor
 								.translateAlternateColorCodes('&', "&Rあなたはチーム："
 										+ teamcolors[teamnumber]
@@ -172,62 +164,25 @@ public class SnowListener implements Listener {
 				&& player.getItemInHand().getType() == Material.WOOD_AXE) {
 			Location loc = event.getClickedBlock().getLocation();
 			if (loc != null) {
-
-			}
-			if(player.hasMetadata("locset")){
-				player.setMetadata("loc2", new FixedMetadataValue(plugin, loc));
-				player.removeMetadata("locset", plugin);
-			}else{
-				player.setMetadata("loc1", new FixedMetadataValue(plugin, loc));
-				player.setMetadata("locset", new FixedMetadataValue(plugin, 1));
-			}
-/*			try{
-				player.getMetadata("loc1").get(0);
-			}
-			catch(java.lang.ArrayIndexOutOfBoundsException e){
-				player.setMetadata("loc1x", new FixedMetadataValue(plugin,loc.getY()));
 			}
 			if (player.hasMetadata("locset")) {
-				if (player.getMetadata("locset").get(0).asInt() == 1) {
-					player.setMetadata("loc2x", new FixedMetadataValue(plugin,
-							loc.getX()));
-					player.setMetadata("loc2y", new FixedMetadataValue(plugin,
-							loc.getY()));
-					player.setMetadata("loc2z", new FixedMetadataValue(plugin,
-							loc.getZ()));
-					player.setMetadata("locset", new FixedMetadataValue(plugin,
-							2));
-					Bukkit.getServer().broadcastMessage(
-							loc.getX() + "," + loc.getY() + "," + loc.getZ()
-									+ "をスロット２に記録しました。");
-				} else {
-					player.setMetadata("loc1x", new FixedMetadataValue(plugin,
-							loc.getX()));
-					player.setMetadata("loc1y", new FixedMetadataValue(plugin,
-							loc.getY()));
-					player.setMetadata("loc1z", new FixedMetadataValue(plugin,
-							loc.getZ()));
-					player.setMetadata("locset", new FixedMetadataValue(plugin,
-							1));
-					Bukkit.getServer().broadcastMessage(
-							loc.getX() + "," + loc.getY() + "," + loc.getZ()
-									+ "をスロット１に記録しました。");
-				}
+				player.setMetadata("loc2x", new FixedMetadataValue(plugin, loc.getX()));
+				player.setMetadata("loc2y", new FixedMetadataValue(plugin, loc.getY()));
+				player.setMetadata("loc2z", new FixedMetadataValue(plugin, loc.getZ()));
+				player.removeMetadata("locset", plugin);
+				player.sendMessage(loc.getX() + "," + loc.getY() + ","
+						+ loc.getZ() + "をスロット２に記録しました。");
 			} else {
-				player.setMetadata("loc1x",
-						new FixedMetadataValue(plugin, loc.getX()));
-				player.setMetadata("loc1y",
-						new FixedMetadataValue(plugin, loc.getY()));
-				player.setMetadata("loc1z",
-						new FixedMetadataValue(plugin, loc.getZ()));
+				player.setMetadata("loc1x", new FixedMetadataValue(plugin, loc.getX()));
+				player.setMetadata("loc1y", new FixedMetadataValue(plugin, loc.getY()));
+				player.setMetadata("loc1z", new FixedMetadataValue(plugin, loc.getZ()));
 				player.setMetadata("locset", new FixedMetadataValue(plugin, 1));
-				Bukkit.getServer().broadcastMessage(
-						loc.getX() + "," + loc.getY() + "," + loc.getZ()
-								+ "をスロット１に記録しました。");
-			}*/
+				player.sendMessage(loc.getX() + "," + loc.getY() + ","
+						+ loc.getZ() + "をスロット１に記録しました。");
+			}
 		}
 	}
-	
+
 	@EventHandler
 	public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
 		if (event.getDamager().getType() == EntityType.SNOWBALL) {
@@ -252,8 +207,7 @@ public class SnowListener implements Listener {
 												.asString())));
 				person.setScore(person.getScore() + 1);
 				team.setScore(team.getScore() + 1);
-				hitPlayer
-						.teleport(hitPlayer.getBedSpawnLocation());
+				hitPlayer.teleport(hitPlayer.getBedSpawnLocation());
 			}
 		}
 		event.setCancelled(true);
