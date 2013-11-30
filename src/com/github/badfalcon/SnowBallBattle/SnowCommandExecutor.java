@@ -117,7 +117,7 @@ public class SnowCommandExecutor implements CommandExecutor {
 										+ Math.random()
 										* (loc2z - loc1z);
 								Location respawn = new Location(world,spawnx,spawny,spawnz);
-								player1.setBedSpawnLocation(respawn);
+								player1.setBedSpawnLocation(respawn,true);
 								player1.teleport(respawn);
 							}
 						}
@@ -172,6 +172,7 @@ public class SnowCommandExecutor implements CommandExecutor {
 							game = new SnowTask(this.plugin).runTask(plugin);
 						}
 					}else{
+						player.sendMessage("定義されていないコマンドです。");
 						return false;
 					}
 /*					switch (args[0]) {
