@@ -1,5 +1,7 @@
 package com.github.badfalcon.SnowBallBattle;
 
+import java.util.List;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -24,7 +26,15 @@ public class SnowCommandExecutor implements CommandExecutor {
 	}
 
 	Boolean ingame = false;
-
+	
+	public boolean isInteger(String str) {
+	    try {
+	        Integer.parseInt(str);
+	        return true;
+	    } catch (NumberFormatException nfex) {
+	        return false;
+	    }
+	}
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label,
 			String[] args) {
@@ -85,9 +95,8 @@ public class SnowCommandExecutor implements CommandExecutor {
 								world.setMetadata(args[1] + "res2z",
 										new FixedMetadataValue(plugin, loc2z));
 								player.sendMessage(args[1] + "のリスポーン地点を\nX:"
-										+ loc1x + "~" + loc2x
-										+ "\nZ" + loc1z + "~"
-										+ loc2z + "に設定しました。");
+										+ loc1x + "~" + loc2x + "\nZ" + loc1z
+										+ "~" + loc2z + "に設定しました。");
 							}
 						}
 					} else if (args[0].equals("ready")) {
@@ -97,27 +106,32 @@ public class SnowCommandExecutor implements CommandExecutor {
 									.asBoolean()) {
 								String team = player1.getMetadata("team")
 										.get(0).asString();
-								double loc1x =  world
-										.getMetadata(team + "res1x").get(0).asDouble();
-								double loc1y =  world
-										.getMetadata(team + "res1y").get(0).asDouble();
-								double loc1z =  world
-										.getMetadata(team + "res1z").get(0).asDouble();
+								double loc1x = world
+										.getMetadata(team + "res1x").get(0)
+										.asDouble();
+								double loc1y = world
+										.getMetadata(team + "res1y").get(0)
+										.asDouble();
+								double loc1z = world
+										.getMetadata(team + "res1z").get(0)
+										.asDouble();
 								double loc2x = world
-										.getMetadata(team + "res2x").get(0).asDouble();
-//								double loc2y = world
-//										.getMetadata(team + "res2y").get(0).asDouble();
+										.getMetadata(team + "res2x").get(0)
+										.asDouble();
+								// double loc2y = world
+								// .getMetadata(team +
+								// "res2y").get(0).asDouble();
 								double loc2z = world
-										.getMetadata(team + "res2z").get(0).asDouble();
-								double spawnx = loc1x
-										+ Math.random()
+										.getMetadata(team + "res2z").get(0)
+										.asDouble();
+								double spawnx = loc1x + Math.random()
 										* (loc2x - loc1x);
 								double spawny = loc1y + 1;
-								double spawnz = loc1z
-										+ Math.random()
+								double spawnz = loc1z + Math.random()
 										* (loc2z - loc1z);
-								Location respawn = new Location(world,spawnx,spawny,spawnz);
-								player1.setBedSpawnLocation(respawn,true);
+								Location respawn = new Location(world, spawnx,
+										spawny, spawnz);
+								player1.setBedSpawnLocation(respawn, true);
 								player1.teleport(respawn);
 							}
 						}
@@ -165,24 +179,58 @@ public class SnowCommandExecutor implements CommandExecutor {
 								this.plugin, 20 * 60 * plugin.getConfig()
 										.getInt("Game.GameTime"));
 						return true;
-					}else if(args[0].equals("stop")){
+					} else if (args[0].equals("stop")) {
 						if (game != null) {
 							Bukkit.getServer().getScheduler()
 									.cancelTask(game.getTaskId());
 							game = new SnowTask(this.plugin).runTask(plugin);
 						}
-					}else{
+					} else if (args[0].equals("spectators")) {
+						if (args[2].equals(null)) {
+							player.sendMessage("プレイヤー名が入力されていません。");
+							return false;
+						} else {
+							List<String> spec = plugin.getConfig()
+									.getStringList("Game.Spectators");
+							if (args[1].equals("add")) {
+								spec.add(args[2]);
+								plugin.getConfig().set("Game.Spectators", spec);
+								plugin.saveConfig();
+								player.sendMessage(args[2] + "をspectatorに追加しました。");
+								return true;
+							} else if (args[1].equals("remove")) {
+								if (spec.contains(args[2])) {
+									spec.remove(args[2]);
+									plugin.getConfig().set("Game.Spectators",
+											spec);
+									plugin.saveConfig();
+									player.sendMessage(args[2] + "をspectatorから削除しました。");
+									return true;
+								}else{
+									player.sendMessage("削除できませんでした。");
+									return false;
+								}
+							}
+						}
+					} else if(args[0].equals("maxplayers")){
+						if(args[1].equals(null)){
+							player.sendMessage("missing parameter");
+						}else{
+							if(!isInteger(args[1])){
+								player.sendMessage("must be an integer");
+							}else{
+								plugin.getConfig().set("Team.MaxPlayers", args[1]);
+								plugin.saveConfig();
+							}
+						}
+					} else {
 						player.sendMessage("定義されていないコマンドです。");
 						return false;
 					}
-/*					switch (args[0]) {
-					case "setspawn":
-					case "ready":
-					case "start":
-					case "stop":
-					default:
-						return false;
-					}*/
+					/*
+					 * switch (args[0]) { case "setspawn": case "ready": case
+					 * "start": case "stop": default: return false; }
+					 */
 				}
 			}
 			return false;
@@ -193,5 +241,4 @@ public class SnowCommandExecutor implements CommandExecutor {
 		}
 
 	}
-
 }
