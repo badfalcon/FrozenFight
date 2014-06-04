@@ -15,5 +15,5 @@ Team:
 Game:
   SnowBallStacks: 5
   GameTime: 5
-  Spectators:
-    - punsuke
+Spectator:
+  Height:20

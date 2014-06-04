@@ -6,9 +6,16 @@ commands:
       description: 【管理者専用】雪合戦プラグインの設定あれこれ。
       usage: /sbb
       permission: sbb
-      permission-message: You don't have 
-      default: op
+      permission-message: You don't have permission.
+   lobby:
+      description: ロビーへワープ。
+      usage: /lobby false
+      permission: lobby
+      permission-message: You don't have permission.
 permissions:
    sbb:
       description: 雪合戦の設定あれこれの変更ができるようになります。
       default: op
+   lobby:
+      description: ロビーへワープできるようになります。
+      default: true
