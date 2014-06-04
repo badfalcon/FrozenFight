@@ -25,16 +25,15 @@ public class SnowCommandExecutor implements CommandExecutor {
 	SnowBallBattle plugin;
 	BukkitTask gameStart;
 	BukkitTask gameEnd;
+	boolean ingame = false;
+	int count = 10;
+
 
 	public SnowCommandExecutor(SnowBallBattle plugin) {
 		this.plugin = plugin;
 	}
 
 	World world = Bukkit.getServer().getWorlds().get(0);
-
-	boolean ingame = false;
-
-	int count = 10;
 
 	public boolean isInteger(String str) {
 		try {

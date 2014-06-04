@@ -14,13 +14,13 @@ public class SnowRunnableStart extends BukkitRunnable {
 
 	SnowBallBattle plugin;
 	Spectator spec;
+	Player[] players;
 
 	public SnowRunnableStart(SnowBallBattle plugin) {
 		this.plugin = plugin;
 		spec = new Spectator(plugin);
+		players = Bukkit.getOnlinePlayers();
 	}
-
-	Player[] players = Bukkit.getOnlinePlayers();
 
 	public void run() {
 		for (Player player : Bukkit.getOnlinePlayers()) {

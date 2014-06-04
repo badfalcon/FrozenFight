@@ -86,6 +86,8 @@ public class SnowTask extends BukkitRunnable {
 				player.getInventory().clear();
 				player.setLevel(0);
 				player.setExp(0);
+			}else{
+				spec.removeSpectate(player);
 			}
 			for (Player player1 : players) {
 				if (!player.canSee(player1)) {
@@ -107,16 +109,13 @@ public class SnowTask extends BukkitRunnable {
 
 		public void run() {
 			Player[] players = plugin.getServer().getOnlinePlayers();
-			for (Player player : players) {
-				new SnowLobby(plugin).warpLobby(player);
-				if (spec.isSpectating(player)) {
-					spec.removeSpectate(player);
-				}
-			}
 			SnowScoreboard snowboard = new SnowScoreboard(plugin);
-//			snowboard.hideScore();
+			snowboard.hideScore();
 			snowboard.resetScore();
 			snowboard.removePlayers();
+			for (Player player : players) {
+				new SnowLobby(plugin).warpLobby(player);
+			}
 		}
 	}
 }

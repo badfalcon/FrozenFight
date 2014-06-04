@@ -36,15 +36,15 @@ public class SnowListener implements Listener {
 
 	SnowBallBattle plugin;
 	Spectator spec;
+	SnowScoreboard snowboard;
+	World world;
 
 	public SnowListener(SnowBallBattle plugin) {
 		this.plugin = plugin;
 		spec = new Spectator(this.plugin);
+		snowboard = new SnowScoreboard(plugin);
+		world = Bukkit.getServer().getWorlds().get(0);
 	}
-
-	World world = Bukkit.getServer().getWorlds().get(0);
-
-	SnowScoreboard snowboard = new SnowScoreboard(plugin);
 
 	@EventHandler
 	public void onPluginEnable(PluginEnableEvent event) {
@@ -52,7 +52,9 @@ public class SnowListener implements Listener {
 		if (world.hasMetadata("ingame")) {
 			world.removeMetadata("ingame", plugin);
 		}
+
 		// ロビーがconfigにある場合に、設定する
+
 		if (plugin.getConfig().contains("lobby")) {
 			Vector lobby = plugin.getConfig().getVector("lobby");
 			float lobbyyaw = plugin.getConfig().getFloatList("lobbyyaw").get(0);
@@ -104,13 +106,26 @@ public class SnowListener implements Listener {
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		Player player = event.getPlayer();
 		if (!world.hasMetadata("ingame")) {
+
+			//ゲーム外
+			player.removeMetadata("team", plugin);
+			player.removeMetadata("teamnumber", plugin);
+			player.removeMetadata("teamcolor", plugin);
+			player.removeMetadata("spectator", plugin);
+
 			new PlayerJoinTeam(plugin).joinTeam(player);
 		} else {
+
+			//ゲーム中
+
 			player.sendMessage("[雪合戦]  現在のゲームが終了するまでお待ちください。");
 			player.setScoreboard(SnowBallBattle.board);
 			spec.setSpectate(player);
 			for (Player player1 : Bukkit.getOnlinePlayers()) {
 				if (!spec.isSpectating(player1)) {
+
+					//観戦者を隠す
+
 					player1.hidePlayer(player);
 				}
 			}
@@ -119,18 +134,23 @@ public class SnowListener implements Listener {
 
 	@EventHandler
 	public void onPlayerQuit(PlayerQuitEvent event) {
-		Player player = event.getPlayer();
-		player.removeMetadata("team", plugin);
-		player.removeMetadata("teamnumber", plugin);
-		player.removeMetadata("teamcolor", plugin);
-		player.removeMetadata("spectator", plugin);
 	}
 
 	@EventHandler
 	public void onPlayerGameModeChange(PlayerGameModeChangeEvent event) {
 		if (world.hasMetadata("ingame")) {
-			event.setCancelled(true);
-			event.getPlayer().sendMessage("ゲーム中はゲームモードの変更はできません。");
+
+			//ゲーム中
+
+			Player player = event.getPlayer();
+			if (!spec.isSpectating(player)) {
+
+				//観戦者
+
+				event.setCancelled(true);
+				event.getPlayer().sendMessage("ゲーム中はゲームモードの変更はできません。");
+
+			}
 		}
 	}
 
@@ -138,11 +158,26 @@ public class SnowListener implements Listener {
 	public void onPlayerInteract(PlayerInteractEvent event) {
 		Player player = event.getPlayer();
 		if (!world.hasMetadata("ingame")) {
+
+			//ゲーム外
+
 			if (player.isOp()) {
+
+				//キャスト処理
+
 				if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+
+					//右クリック
+
 					if (player.getItemInHand().getType() == Material.WOOD_AXE) {
+
+						//木の斧
+
 						Location loc = event.getClickedBlock().getLocation();
 						if (loc != null) {
+
+							//クリック先が空気じゃない場合、位置を記録
+
 							player.setMetadata("locx", new FixedMetadataValue(
 									plugin, loc.getBlockX() + 0.5));
 							player.setMetadata("locy", new FixedMetadataValue(
@@ -162,14 +197,24 @@ public class SnowListener implements Listener {
 					}
 				}
 			} else {
-				event.setCancelled(true);
+
+				//ゲスト処理
+
+				//event.setCancelled(true);
 			}
 		} else {
+
+			//ゲーム中
+
 			if (event.getAction() == Action.RIGHT_CLICK_AIR
 					&& event.getMaterial() == Material.SNOW_BALL) {
 
+				//右クリックかつ雪玉
+
 			} else {
-				// Bukkit.getLogger().info("pi");
+
+				//以外
+
 				event.setCancelled(true);
 			}
 		}
@@ -177,19 +222,28 @@ public class SnowListener implements Listener {
 
 	@EventHandler
 	public void onWeatherChange(WeatherChangeEvent event) {
-		event.setCancelled(true);
+
+		//天候の変化時
+
+		//event.setCancelled(true);
 	}
 
 	@EventHandler
 	public void onFoodLevelChange(FoodLevelChangeEvent event) {
+
+		//空腹度の変化時
+
 		event.setFoodLevel(18);
+
 	}
 
 	@EventHandler
 	public void onEntityDamage(EntityDamageEvent event) {
 		if (event.getEntity() instanceof Player
 				&& event.getCause() != DamageCause.PROJECTILE) {
-			// Bukkit.getLogger().info("ed");
+
+			//ダメージ処理をキャンセル
+
 			event.setCancelled(true);
 		}
 	}
@@ -207,16 +261,23 @@ public class SnowListener implements Listener {
 	}
 
 	public void onPlayerMove(PlayerMoveEvent event) {
-		if (plugin.getConfig().contains("Spectator.Height")) {
-			plugin.getLogger().info("Y = " + event.getTo().getY());
-			plugin.getLogger().info("specheight = " + plugin.getConfig().getInt("Spectator.Height"));
-			if (event.getTo().getY() < plugin.getConfig().getInt(
-					"Spectator.Height")) {
-				Player player = event.getPlayer();
-				if (spec.isSpectating(player)) {
-					event.setCancelled(true);
-					player.sendMessage("[雪合戦]  ゲームに干渉するおそれがるため、これより下にはいけません。");
-				}
+
+		//プレイヤー移動時
+
+		plugin.getLogger().info("Y = " + event.getTo().getY());
+		plugin.getLogger().info("specheight = " + plugin.getConfig().getInt("Spectator.Height"));
+		if (event.getTo().getY() < plugin.getConfig().getInt(
+				"Spectator.Height")) {
+
+			//観戦位置が低い時
+
+			Player player = event.getPlayer();
+			if (spec.isSpectating(player)) {
+
+				//観戦中
+
+				event.setCancelled(true);
+				player.sendMessage("[雪合戦]  ゲームに干渉するおそれがるため、これより下にはいけません。");
 			}
 		}
 	}
@@ -224,20 +285,32 @@ public class SnowListener implements Listener {
 	@EventHandler
 	public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
 		if (event.getCause().equals(DamageCause.ENTITY_ATTACK)) {
+
+			//エンティティによるダメージの場合
+
 			// Bukkit.getLogger().info("edbe");
 			event.setCancelled(true);
 		} else if (event.getDamager().getType() == EntityType.SNOWBALL) {
+
+			//雪玉によるダメージの場合
+
 			Projectile projectile = (Projectile) event.getDamager();
 			Player shooter = (Player) projectile.getShooter();
 			Player hitPlayer = (Player) event.getEntity();
 			if (!spec.isSpectating(hitPlayer)
 					&& hitPlayer.getNoDamageTicks() == 0) {
+
+				//試合中かつ無敵時間じゃない場合
+
 				String hitPlayerTeam = hitPlayer.getMetadata("team").get(0)
 						.asString();
 				String shooterTeam = shooter.getMetadata("team").get(0)
 						.asString();
 				if (!shooter.getName().equals(hitPlayer.getName())
 						&& !shooterTeam.equals(hitPlayerTeam)) {
+
+					//チーム、プレイヤーが異なる場合
+
 					Score person = SnowBallBattle.board.getObjective("Pscore")
 							.getScore(shooter);
 					String shooterTeamColor = shooter.getMetadata("teamcolor")
