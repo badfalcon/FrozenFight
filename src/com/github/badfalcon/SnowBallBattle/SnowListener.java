@@ -260,12 +260,15 @@ public class SnowListener implements Listener {
 		}
 	}
 
+	@EventHandler
 	public void onPlayerMove(PlayerMoveEvent event) {
+
+		//	event.getPlayer().sendMessage("playermove");
 
 		//プレイヤー移動時
 
-		plugin.getLogger().info("Y = " + event.getTo().getY());
-		plugin.getLogger().info("specheight = " + plugin.getConfig().getInt("Spectator.Height"));
+		//plugin.getLogger().info("Y = " + event.getTo().getY());
+		//plugin.getLogger().info("specheight = " + plugin.getConfig().getInt("Spectator.Height"));
 		if (event.getTo().getY() < plugin.getConfig().getInt(
 				"Spectator.Height")) {
 
@@ -276,7 +279,14 @@ public class SnowListener implements Listener {
 
 				//観戦中
 
-				event.setCancelled(true);
+				Location loc = player.getLocation();
+				loc.setY(plugin.getConfig().getInt(
+						"Spectator.Height") + 5);
+
+
+				player.teleport(loc);
+				player.setFlying(true);
+
 				player.sendMessage("[雪合戦]  ゲームに干渉するおそれがるため、これより下にはいけません。");
 			}
 		}

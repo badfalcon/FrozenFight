@@ -20,8 +20,7 @@ public class PlayerJoinTeam {
 
 	public void joinTeam(Player player) {
 
-		List<String> spectatorList = plugin.getConfig().getStringList(
-				"Game.Spectators");
+		List<String> spectatorList = plugin.getConfig().getStringList("Spectator.List");
 
 		Scoreboard board = SnowBallBattle.board;
 		player.setScoreboard(board);
@@ -39,9 +38,6 @@ public class PlayerJoinTeam {
 			Collections.sort(teamsizes);
 
 			int leastTeam = teamsizes.get(0);
-			int full = plugin.getConfig().getInt("Team.MaxPlayers");
-
-			if (leastTeam < full) {
 				while (true) {
 					int teamnumber = (int) (Math.random() * teams.size());
 					Team jointeam = board.getTeam(teams.get(teamnumber));
@@ -63,13 +59,8 @@ public class PlayerJoinTeam {
 						break;
 					}
 				}
-			} else {
-				plugin.getLogger().info("人数が上限に達しました。");
-			}
 		} else {
 			player.sendMessage("[雪合戦]  あなたは観戦者です。");
-			player.setMetadata("spectating", new FixedMetadataValue(plugin,
-					true));
 		}
 	}
 }

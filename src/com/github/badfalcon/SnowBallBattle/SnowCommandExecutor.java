@@ -28,7 +28,6 @@ public class SnowCommandExecutor implements CommandExecutor {
 	boolean ingame = false;
 	int count = 10;
 
-
 	public SnowCommandExecutor(SnowBallBattle plugin) {
 		this.plugin = plugin;
 	}
@@ -296,34 +295,38 @@ public class SnowCommandExecutor implements CommandExecutor {
 						return true;
 					}
 				}
+				if (players.length > plugin.getConfig().getStringList("Team.TeamNames").size()
+						* plugin.getConfig().getInt("Team.MaxPlayers")) {
+					sender.sendMessage("チームサイズを超えています。");
+					return true;
+				}
 				new SnowScoreboard(plugin).removePlayers();
 				for (Player player : players) {
-					if (spec.isSpectator(player.getName())) {
-						continue;
-					}
 					new PlayerJoinTeam(plugin).joinTeam(player);
 
 					//↓途中参加者への例外処理が不完全
+					if (!spec.isSpectator(player.getName())) {
 
-					String team = player.getMetadata("team").get(0).asString();
-					double spawnx = world.getMetadata(team + "resx").get(0)
-							.asDouble();
-					double spawny = world.getMetadata(team + "resy").get(0)
-							.asDouble();
-					double spawnz = world.getMetadata(team + "resz").get(0)
-							.asDouble();
-					float spawnyaw = world.getMetadata(team + "resyaw").get(0)
-							.asFloat();
-					Location respawn = new Location(world, spawnx, spawny + 1,
-							spawnz, spawnyaw, 0);
-					player.setBedSpawnLocation(respawn, true);
-					player.teleport(respawn);
-					player.setWalkSpeed(0.001F);
-					PotionEffect noJump = new PotionEffect(
-							PotionEffectType.JUMP, 200, -100, false);
-					player.addPotionEffect(noJump);
-					for (Player player1 : players) {
-						player.hidePlayer(player1);
+						String team = player.getMetadata("team").get(0).asString();
+						double spawnx = world.getMetadata(team + "resx").get(0)
+								.asDouble();
+						double spawny = world.getMetadata(team + "resy").get(0)
+								.asDouble();
+						double spawnz = world.getMetadata(team + "resz").get(0)
+								.asDouble();
+						float spawnyaw = world.getMetadata(team + "resyaw").get(0)
+								.asFloat();
+						Location respawn = new Location(world, spawnx, spawny + 1,
+								spawnz, spawnyaw, 0);
+						player.setBedSpawnLocation(respawn, true);
+						player.teleport(respawn);
+						player.setWalkSpeed(0.001F);
+						PotionEffect noJump = new PotionEffect(
+								PotionEffectType.JUMP, 200, -100, false);
+						player.addPotionEffect(noJump);
+						for (Player player1 : players) {
+							player.hidePlayer(player1);
+						}
 					}
 				}
 				world.setMetadata("ready", new FixedMetadataValue(plugin, true));
@@ -354,7 +357,7 @@ public class SnowCommandExecutor implements CommandExecutor {
 						sender.sendMessage("must be an integer");
 						return true;
 					} else {
-						plugin.getConfig().set("Spectator.Height", args[1]);
+						plugin.getConfig().set("Spectator.Height", Integer.parseInt(args[1]));
 						plugin.saveConfig();
 						return true;
 					}
