@@ -8,6 +8,8 @@ import org.bukkit.scoreboard.ScoreboardManager;
 
 public class SnowBallBattle extends JavaPlugin {
 
+	final static String messagePrefix = "[雪合戦] ";
+
 	private SnowCommandExecutor snowExecutor;
 	private SnowTabCompleter snowCompleter;
 

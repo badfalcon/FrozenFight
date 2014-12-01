@@ -1,21 +1,22 @@
 name: SnowBallBattle
 main: com.github.badfalcon.SnowBallBattle.SnowBallBattle
-version: 0.1
+version: 0.9
+prefix: SBB
 commands:
    sbb:
-      description: 【管理者専用】雪合戦プラグインの設定あれこれ。
+      description: sbb
       usage: /sbb
       permission: sbb
       permission-message: You don't have permission.
    lobby:
-      description: ロビーへワープ。
+      description: lobby
       usage: /lobby false
       permission: lobby
       permission-message: You don't have permission.
 permissions:
    sbb:
-      description: 雪合戦の設定あれこれの変更ができるようになります。
+      description: sbb permission
       default: op
    lobby:
-      description: ロビーへワープできるようになります。
+      description: lobby permission
       default: true

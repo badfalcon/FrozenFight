@@ -1,5 +1,6 @@
 package com.github.badfalcon.SnowBallBattle;
 
+import java.util.List;
 import java.util.Set;
 
 import org.bukkit.Bukkit;
@@ -28,36 +29,58 @@ public class SnowScoreboard {
 	World world = Bukkit.getWorlds().get(0);
 
 	public void setScoreboard() {
-		String[] stringteams = plugin.getConfig()
-				.getStringList("Team.TeamNames").toArray(new String[0]);
-		String[] teamcolors = (String[]) plugin.getConfig()
-				.getStringList("Team.TeamColors").toArray(new String[0]);
-		Team[] teams = new Team[stringteams.length];
+		String[] teamNames = plugin.getConfig()
+				.getStringList("Team.Names").toArray(new String[0]);
+
 		Objective Tscore = board.registerNewObjective("Tscore", "dummy");
 		Objective Pscore = board.registerNewObjective("Pscore", "dummy");
-		Tscore.setDisplayName("Team Score");
+
+		int MaxTime = plugin.getConfig().getInt("Game.GameTime") * 60;
+		int gamemin = MaxTime / 60;
+		int gamesec = MaxTime % 60;
+
+		String gamesecString;
+		if (gamesec < 10) {
+			gamesecString = "0" + String.valueOf(gamesec);
+		} else {
+			gamesecString = String.valueOf(gamesec);
+		}
+
+		Tscore.setDisplayName("Time  " + gamemin + ":" + gamesecString);
 		Pscore.setDisplayName("points");
-		for (int i = 0; i < stringteams.length; i++) {
-			teams[i] = board.registerNewTeam(stringteams[i]);
-			teamcolors[i] = ChatColor.translateAlternateColorCodes('&',
-					teamcolors[i]);
-			teams[i].setPrefix(teamcolors[i]);
-			teams[i].setSuffix(ChatColor.RESET.toString());
-			teams[i].setAllowFriendlyFire(false);
-			if (plugin.getConfig().contains(stringteams[i] + "respawn")) {
+
+		for (String teamName : teamNames) {
+
+			Team team = board.registerNewTeam(teamName);
+
+			String teamColor = plugin.getConfig().getString(teamName + ".Color");
+			team.setPrefix(teamColor.toString());
+			team.setSuffix(ChatColor.RESET.toString());
+			team.setAllowFriendlyFire(false);
+
+			OfflinePlayer teamPlayer = Bukkit
+					.getOfflinePlayer(team.getPrefix() + teamName + team.getSuffix());
+
+			team.addPlayer(teamPlayer);
+			Tscore.getScore(teamPlayer).setScore(0);
+
+			if (plugin.getConfig().contains(teamName + "respawn")) {
+
+				//リスポーン設定を含む場合
+
 				Vector res = plugin.getConfig().getVector(
-						stringteams[i] + "respawn");
+						teamName + "Respawn");
 				float resyaw = plugin.getConfig()
-						.getFloatList(stringteams[i] + "yaw").get(0);
-				world.setMetadata(stringteams[i] + "resx",
+						.getFloatList(teamName + "Yaw").get(0);
+				world.setMetadata(teamName + "Resx",
 						new FixedMetadataValue(plugin, res.getX()));
-				world.setMetadata(stringteams[i] + "resy",
+				world.setMetadata(teamName + "Resy",
 						new FixedMetadataValue(plugin, res.getY()));
-				world.setMetadata(stringteams[i] + "resz",
+				world.setMetadata(teamName + "Resz",
 						new FixedMetadataValue(plugin, res.getZ()));
-				world.setMetadata(stringteams[i] + "resyaw",
+				world.setMetadata(teamName + "Resyaw",
 						new FixedMetadataValue(plugin, resyaw));
-				world.setMetadata(stringteams[i] + "set",
+				world.setMetadata(teamName + "Set",
 						new FixedMetadataValue(plugin, true));
 			}
 		}
@@ -70,14 +93,11 @@ public class SnowScoreboard {
 			Pscore.setScore(0);
 		}
 		Objective Tscores = board.getObjective("Tscore");
-		String[] teamNames = (String[]) plugin.getConfig()
-				.getStringList("Team.TeamNames").toArray(new String[0]);
-		String[] teamColors = (String[]) plugin.getConfig()
-				.getStringList("Team.TeamColors").toArray(new String[0]);
-		for (int i = 0; i < teamNames.length; i++) {
-			Score teamscore = Tscores.getScore(Bukkit
-					.getOfflinePlayer(ChatColor.translateAlternateColorCodes(
-							'&', teamColors[i] + teamNames[i])));
+		List<String> teamNames = plugin.getConfig()
+				.getStringList("Team.Names");
+		for (String teamName : teamNames) {
+			Team team = board.getTeam(teamName);
+			Score teamscore = Tscores.getScore(Bukkit.getOfflinePlayer(team.getPrefix() + teamName + team.getSuffix()));
 			teamscore.setScore(0);
 		}
 	}
@@ -86,14 +106,14 @@ public class SnowScoreboard {
 		Objective Pscore = board.getObjective("Pscore");
 		Objective Tscore = board.getObjective("Tscore");
 		Pscore.setDisplaySlot(DisplaySlot.BELOW_NAME);
+		Pscore.setDisplaySlot(DisplaySlot.PLAYER_LIST);
 		Tscore.setDisplaySlot(DisplaySlot.SIDEBAR);
 	}
 
 	public void hideScore() {
-		Objective Pscore = board.getObjective("personalscore");
-		Objective Tscore = board.getObjective("score");
-		Pscore.setDisplaySlot(null);
-		Tscore.setDisplaySlot(null);
+		board.clearSlot(DisplaySlot.BELOW_NAME);
+		board.clearSlot(DisplaySlot.PLAYER_LIST);
+		board.clearSlot(DisplaySlot.SIDEBAR);
 	}
 
 	public void removePlayers() {

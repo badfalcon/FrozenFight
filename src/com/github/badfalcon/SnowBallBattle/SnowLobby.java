@@ -28,7 +28,7 @@ public class SnowLobby {
 			float lobbyyaw = world.getMetadata("lobbyyaw").get(0).asFloat();
 			lobby = new Location(world, lobbyx, lobbyy + 1, lobbyz, lobbyyaw, 0);
 			player.teleport(lobby);
-			player.sendMessage("[雪合戦]  ロビーへワープしました。");
+			player.sendMessage(SnowBallBattle.messagePrefix + "ロビーへワープしました。");
 		} else {
 			Bukkit.getLogger().info(ChatColor.RED + "ロビーが設定されていません。");
 		}

@@ -1,19 +1,20 @@
 # default config.yml
-Area:
-  SelectItemID: 
+LocationItem: WOOD_SPADE
 Team:
-  MaxPlayers: 1
-  TeamNames:
+  Names:
     - Red
     - Blue
-  TeamColors:
-    - "&C"
-    - "&9"
-  TeamArmor:
-    - IRON
-    - DIAMOND
+Red:
+  Color: Åòc
+  Armor: IRON
+Blue:
+  Color: Åò9
+  Armor: DIAMOND
 Game:
-  SnowBallStacks: 5
-  GameTime: 5
+  SnowBallStacks: 2
+  GiveSnowBallNum: 5 #num
+  GiveSnowBallTime: 30 #seconds
+  GameTime: 5  #minutes
+  InvincibleTime: 20  #ticks (20tick = 1second) 
 Spectator:
   Height:20

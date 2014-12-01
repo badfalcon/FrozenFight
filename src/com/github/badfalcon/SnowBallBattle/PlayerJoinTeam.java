@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.scoreboard.Scoreboard;
@@ -27,40 +26,35 @@ public class PlayerJoinTeam {
 
 		if (!spectatorList.contains(player.getName())) {
 
-			List<String> teams = plugin.getConfig().getStringList("Team.TeamNames");
-			List<String> teamcolors = plugin.getConfig().getStringList(
-					"Team.TeamColors");
+			List<String> teamNames = plugin.getConfig().getStringList("Team.Names");
 			List<Integer> teamsizes = new ArrayList<Integer>();
 
-			for (String team : teams) {
+			for (String team : teamNames) {
 				teamsizes.add(board.getTeam(team).getSize());
 			}
 			Collections.sort(teamsizes);
 
 			int leastTeam = teamsizes.get(0);
-				while (true) {
-					int teamnumber = (int) (Math.random() * teams.size());
-					Team jointeam = board.getTeam(teams.get(teamnumber));
-					if (jointeam.getSize() == leastTeam) {
-						jointeam.addPlayer(player);
-						player.setMetadata("team", new FixedMetadataValue(
-								plugin, teams.get(teamnumber)));
-						player.setMetadata("teamnumber",
-								new FixedMetadataValue(plugin, teamnumber));
-						player.setMetadata("teamcolor", new FixedMetadataValue(
-								plugin, teamcolors.get(teamnumber)));
-						player.setMetadata("spectator", new FixedMetadataValue(
-								plugin, false));
-						player.sendMessage(ChatColor
-								.translateAlternateColorCodes('&', "&R[雪合戦]  あなたはチーム："
-										+ teamcolors.get(teamnumber)
-										+ jointeam.getName().toString()
-										+ "&Rへ参加しました。"));
-						break;
-					}
+			while (true) {
+
+				int teamnumber = (int) (Math.random() * teamNames.size());
+				Team jointeam = board.getTeam(teamNames.get(teamnumber));
+
+				if (jointeam.getSize() == leastTeam) {
+					jointeam.addPlayer(player);
+					player.setMetadata("TeamName", new FixedMetadataValue(
+							plugin, teamNames.get(teamnumber)));
+					player.sendMessage(SnowBallBattle.messagePrefix + "あなたはチーム" + jointeam.getPrefix()
+							+ jointeam.getName().toString()
+							+ jointeam.getSuffix()
+							+ "へ参加しました。");
+					SnowBallBattle.board.getObjective("Pscore")
+					.getScore(player).setScore(0);
+					break;
 				}
+			}
 		} else {
-			player.sendMessage("[雪合戦]  あなたは観戦者です。");
+			player.sendMessage(SnowBallBattle.messagePrefix + "あなたは観戦者です。");
 		}
 	}
 }

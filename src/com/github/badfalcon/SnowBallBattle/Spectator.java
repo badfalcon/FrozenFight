@@ -20,6 +20,7 @@ public class Spectator {
 		player.setFlying(true);
 		player.getInventory().clear();
 		player.setCanPickupItems(false);
+		player.setFlySpeed(0.7F);
 		if (plugin.getConfig().contains("Spectator.Height")) {
 			Location location = player.getLocation();
 			location.setY(location.getY()
@@ -30,6 +31,7 @@ public class Spectator {
 	}
 
 	public void removeSpectate(Player player) {
+		player.setFlySpeed(0.2F);
 		player.setAllowFlight(false);
 		player.setFlying(false);
 		player.setCanPickupItems(true);
