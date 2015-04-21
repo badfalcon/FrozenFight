@@ -29,8 +29,8 @@ public class SnowScoreboard {
 	World world = Bukkit.getWorlds().get(0);
 
 	public void setScoreboard() {
-		String[] teamNames = plugin.getConfig()
-				.getStringList("Team.Names").toArray(new String[0]);
+		String[] teamNames = plugin.getConfig().getStringList("Team.Names")
+				.toArray(new String[0]);
 
 		Objective Tscore = board.registerNewObjective("Tscore", "dummy");
 		Objective Pscore = board.registerNewObjective("Pscore", "dummy");
@@ -52,38 +52,48 @@ public class SnowScoreboard {
 		for (String teamName : teamNames) {
 
 			Team team = board.registerNewTeam(teamName);
-
-			String teamColor = plugin.getConfig().getString(teamName + ".Color");
+			ChatColor teamColor = getChatColor(plugin.getConfig().getString(
+					teamName + ".Color"));
 			team.setPrefix(teamColor.toString());
 			team.setSuffix(ChatColor.RESET.toString());
 			team.setAllowFriendlyFire(false);
 
-			OfflinePlayer teamPlayer = Bukkit
-					.getOfflinePlayer(team.getPrefix() + teamName + team.getSuffix());
+			OfflinePlayer teamPlayer = Bukkit.getOfflinePlayer(team.getPrefix()
+					+ teamName + team.getSuffix());
 
 			team.addPlayer(teamPlayer);
 			Tscore.getScore(teamPlayer).setScore(0);
 
 			if (plugin.getConfig().contains(teamName + "respawn")) {
 
-				//リスポーン設定を含む場合
+				// リスポーン設定を含む場合
 
-				Vector res = plugin.getConfig().getVector(
-						teamName + "Respawn");
+				Vector res = plugin.getConfig().getVector(teamName + "Respawn");
 				float resyaw = plugin.getConfig()
 						.getFloatList(teamName + "Yaw").get(0);
-				world.setMetadata(teamName + "Resx",
-						new FixedMetadataValue(plugin, res.getX()));
-				world.setMetadata(teamName + "Resy",
-						new FixedMetadataValue(plugin, res.getY()));
-				world.setMetadata(teamName + "Resz",
-						new FixedMetadataValue(plugin, res.getZ()));
-				world.setMetadata(teamName + "Resyaw",
-						new FixedMetadataValue(plugin, resyaw));
-				world.setMetadata(teamName + "Set",
-						new FixedMetadataValue(plugin, true));
+				world.setMetadata(teamName + "Resx", new FixedMetadataValue(
+						plugin, res.getX()));
+				world.setMetadata(teamName + "Resy", new FixedMetadataValue(
+						plugin, res.getY()));
+				world.setMetadata(teamName + "Resz", new FixedMetadataValue(
+						plugin, res.getZ()));
+				world.setMetadata(teamName + "Resyaw", new FixedMetadataValue(
+						plugin, resyaw));
+				world.setMetadata(teamName + "Set", new FixedMetadataValue(
+						plugin, true));
 			}
 		}
+	}
+
+	ChatColor getChatColor(String str) {
+		ChatColor[] colorNames = ChatColor.values();
+		for (ChatColor color : colorNames) {
+			if (color.name().equals(str)) {
+				return color;
+			}
+		}
+		return null;
+
 	}
 
 	public void resetScore() {
@@ -93,11 +103,11 @@ public class SnowScoreboard {
 			Pscore.setScore(0);
 		}
 		Objective Tscores = board.getObjective("Tscore");
-		List<String> teamNames = plugin.getConfig()
-				.getStringList("Team.Names");
+		List<String> teamNames = plugin.getConfig().getStringList("Team.Names");
 		for (String teamName : teamNames) {
 			Team team = board.getTeam(teamName);
-			Score teamscore = Tscores.getScore(Bukkit.getOfflinePlayer(team.getPrefix() + teamName + team.getSuffix()));
+			Score teamscore = Tscores.getScore(Bukkit.getOfflinePlayer(team
+					.getPrefix() + teamName + team.getSuffix()));
 			teamscore.setScore(0);
 		}
 	}

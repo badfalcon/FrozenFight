@@ -2,9 +2,9 @@ package com.github.badfalcon.SnowBallBattle;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
@@ -19,246 +19,346 @@ public class SnowTabCompleter implements TabCompleter {
 
 	String[] commands;
 	List<String> tab;
-	List<String> teams;
+
+	public List<String> getTeams() {
+		return plugin.getConfig().getStringList("Team.Names");
+	}
+
+	public List<String> getItems() {
+		SnowItem[] snowItem = SnowItem.values();
+		List<String> list = new ArrayList<String>();
+		for (SnowItem itemName : snowItem) {
+			list.add(itemName.name());
+		}
+		return list;
+	}
+
+	public List<String> getColors() {
+		ChatColor[] chatColor = ChatColor.values();
+		List<String> list = new ArrayList<String>();
+		for (ChatColor colorName : chatColor) {
+			list.add(colorName.name());
+		}
+		return list;
+	}
+
+	public List<String> getArmors() {
+		List<String> list = Arrays.asList("LEATHER", "CHAINMAIL", "IRON",
+				"GOLD", "DIAMOND");
+		return list;
+	}
 
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command,
 			String alias, String[] args) {
 		tab = new ArrayList<String>();
-		teams = plugin.getConfig().getStringList("Team.Names");
+
 		// sbb
+
 		if (command.getName().equalsIgnoreCase("sbb")) {
-			if (args.length == 1 && args[0].length() == 0) {
-				tab = Arrays.asList("getmeta", "ready",
-						"set", "spectators", "spectateheight", "stop", "teams");
-			} else {
-				// getmeta
-				if ("getmeta".startsWith(args[0])) {
-					if (args[0].equalsIgnoreCase("getmeta")) {
-						if (args.length == 2 && args[1].length() == 0) {
-							tab.addAll(Arrays.asList("world", "player"));
+			if (args.length == 0 || args[0].length() == 0) {
+				tab = Arrays.asList("getmeta", "item", "ready", "set", "spect",
+						"stop", "teams");
+			}
+
+			// help
+			else if ("help".startsWith(args[0])) {
+				if (args[0].equalsIgnoreCase("help")) {
+					return tab;
+				} else {
+					tab.addAll(Arrays.asList("help"));
+				}
+			}
+
+			else if ("item".startsWith(args[0])) {
+				if (args[0].equalsIgnoreCase("item")) {
+					if (args.length == 1) {
+						return tab;
+					}
+					if (args[1].length() == 0) {
+						tab.addAll(Arrays.asList("add", "list", "rem", "type",
+								"toggle"));
+					}
+
+					// add
+
+					else if ("add".startsWith(args[1])) {
+						if (args[1].equalsIgnoreCase("add")) {
+							if (args.length == 2) {
+								return tab;
+							}
+							if (args[2].length() == 0) {
+								List<String> items = getItems();
+								tab.addAll(items);
+							}
 						} else {
-							// world
-							if ("world".startsWith(args[1])) {
-								if (args[1].equalsIgnoreCase("world")) {
-									if (args.length == 3
-											&& args[2].length() == 0) {
-										// tab = nothing;
-										tab.addAll(teams);
-										tab.add("lobby");
-										Collections.sort(tab);
-									}
-								} else {
-									tab.addAll(Arrays.asList("world"));
-								}
-							}
-							// player
-							if ("player".startsWith(args[1])) {
-								if (args[1].equalsIgnoreCase("player")) {
-									if (args.length == 3
-											&& args[2].length() == 0) {
-										return null;
-									}
-								} else {
-									tab.addAll(Arrays.asList("player"));
-								}
-							}
+							tab.addAll(Arrays.asList("add"));
 						}
-					} else {
-						tab.addAll(Arrays.asList("getmeta"));
 					}
-				}
-				/*
-				// maxplayers
-				if ("maxplayers".startsWith(args[0])) {
-					if (args[0].equalsIgnoreCase("maxplayers")) {
-						// last argument
-					} else {
-						tab.addAll(Arrays.asList("maxplayers"));
-					}
-				}
-				*/
-				// ready
-				if ("ready".startsWith(args[0])) {
-					if (args[0].equalsIgnoreCase("ready")) {
-						// last argument
-					} else {
-						tab.addAll(Arrays.asList("ready"));
-					}
-				}
-				/*
-				// rearrange
-				if ("rearrange".startsWith(args[0])) {
-					if (args[0].equalsIgnoreCase("rearrange")) {
-						// last argument
-					} else {
-						tab.addAll(Arrays.asList("rearrange"));
-					}
-				}
-				*/
-				// set
-				if ("set".startsWith(args[0])) {
-					if (args[0].equalsIgnoreCase("set")) {
-						if (args.length == 2 && args[1].length() == 0) {
-							tab.addAll(Arrays.asList("lobby", "spawn"));
+
+					// dur
+
+					else if ("dur".startsWith(args[1])) {
+						if (args[1].equalsIgnoreCase("dur")) {
+							if (args.length == 2) {
+								return tab;
+							}
+							if (args[2].length() == 0) {
+								List<String> items = getItems();
+								tab.addAll(items);
+							}
 						} else {
-							// lobby
-							if ("lobby".startsWith(args[1])) {
-								if (args[1].equalsIgnoreCase("lobby")) {
-									// last argument
-								} else {
-									tab.addAll(Arrays.asList("lobby"));
-								}
-							}
-							// spawn
-							if ("spawn".startsWith(args[1])) {
-								if (args[1].equalsIgnoreCase("spawn")) {
-									if (args.length == 3
-											&& args[2].length() == 0) {
-										// teamlist
-										tab = new ArrayList<String>(teams);
-									}
-								} else {
-									tab.addAll(Arrays.asList("spawn"));
-								}
-							}
+							tab.addAll(Arrays.asList("dur"));
 						}
-					} else {
-						tab.addAll(Arrays.asList("set"));
 					}
-				}
-				// spectateheight
-				if ("spectateheight".startsWith(args[0])) {
-					if (args[0].equalsIgnoreCase("spectateheight")) {
-						// last argument
-					} else {
-						tab.addAll(Arrays.asList("spectateheight"));
-					}
-				}
 
-				// spectators
-				if ("spectators".startsWith(args[0])) {
-					if (args[0].equalsIgnoreCase("spectators")) {
-						if (args.length == 2 && args[1].length() == 0) {
-							tab.addAll(Arrays.asList("add", "remove"));
+					// toggle
+
+					else if ("toggle".startsWith(args[1])) {
+						if (args[1].equalsIgnoreCase("toggle")) {
+							if (args.length == 2) {
+								return tab;
+							}
+							if (args[2].length() == 0) {
+								List<String> items = getItems();
+								tab.addAll(items);
+							}
 						} else {
-							// add
-							if ("add".startsWith(args[1])) {
-								if (args[1].equalsIgnoreCase("add")) {
-									if (args.length == 3
-											&& args[2].length() == 0) {
-										tab = null;
-									}
-								} else {
-									tab.addAll(Arrays.asList("add"));
-								}
-							}
-							// remove
-							if ("remove".startsWith(args[1])) {
-								if (args[1].equalsIgnoreCase("remove")) {
-									if (args.length == 3
-											&& args[2].length() == 0) {
-										tab = null;
-									}
-								} else {
-									tab.addAll(Arrays.asList("remove"));
-								}
-							}
+							tab.addAll(Arrays.asList("toggle"));
 						}
-					} else {
-						tab.addAll(Arrays.asList("spectators"));
+
 					}
-				}
-				// stop
-				if ("stop".startsWith(args[0])) {
-					if (args[0].equalsIgnoreCase("stop")) {
-						// last argument
-					} else {
-						tab.addAll(Arrays.asList("stop"));
-					}
-				}
-				// teams
-				if ("teams".startsWith(args[0])) {
-					if (args[0].equalsIgnoreCase("teams")) {
-						if (args.length == 2 && args[1].length() == 0) {
-							tab.addAll(Arrays.asList("add", "list", "remove"));
+					// rem
+					else if ("rem".startsWith(args[1])) {
+						if (args[1].equalsIgnoreCase("rem")) {
+							if (args.length == 2) {
+								return tab;
+							}
+							if (args[2].length() == 0) {
+								List<String> items = getItems();
+								tab.addAll(items);
+							}
 						} else {
-							// add
-							if ("add".startsWith(args[1])) {
-								if (args[1].equalsIgnoreCase("add")) {
-									if (args.length == 3
-											&& args[2].length() == 0) {
+							tab.addAll(Arrays.asList("rem"));
+						}
+					}
+					// type
+					else if ("type".startsWith(args[1])) {
+						if (args[1].equalsIgnoreCase("type")) {
+							if (args.length == 2) {
+								return tab;
+							}
+							if (args[2].length() == 0) {
+								List<String> items = getItems();
+								tab.addAll(items);
+							}
+						} else {
+							tab.addAll(Arrays.asList("type"));
+						}
+					}
+					// list
+					else if ("list".startsWith(args[1])) {
+						if (args[1].equalsIgnoreCase("list")) {
+							return tab;
+						} else {
+							tab.addAll(Arrays.asList("list"));
+						}
+					}
+				} else {
+					tab.addAll(Arrays.asList("item"));
+				}
+			}
 
-										//チーム名なのでsuggestはなし
+			// ready
+			else if ("ready".startsWith(args[0])) {
+				if (args[0].equalsIgnoreCase("ready")) {
+					return tab;
+				} else {
+					tab.addAll(Arrays.asList("ready"));
+				}
+			}
 
-									} else {
-										List<String> colorList = Arrays.asList("BLACK", "DARK_BLUE", "DARK_GREEN",
-												"DARK_AQUA",
-												"DARK_RED", "DARK_PURPLE", "GOLD", "GRAY", "DARK_GRAY", "BLUE",
-												"GREEN", "AQUA", "RED", "LIGHT_PURPLE", "YELLOW", "WHITE");
-										if (args.length == 4 && args[3].length() == 0) {
-											tab.addAll(colorList);
-										} else {
-											for (String color : colorList) {
-												if (color.startsWith(args[3])) {
-													if (args[3].equalsIgnoreCase(color)) {
-														List<String> armorList = Arrays.asList("LEATHER", "CHAINMAIL",
-																"IRON", "GOLD", "DIAMOND");
-														if (args.length == 5 && args[4].length() == 0) {
-															tab.addAll(armorList);
-														} else {
-															for (String armor : armorList) {
-																if (armor.startsWith(args[4])) {
-																	if (args[4].equalsIgnoreCase(armor)) {
+			// set
+			else if ("set".startsWith(args[0])) {
+				if (args[0].equalsIgnoreCase("set")) {
+					if (args.length == 1) {
+						return tab;
+					}
+					if (args[1].length() == 0) {
+						tab.addAll(Arrays.asList("lobby", "spawn"));
+					}
+					// lobby
+					else if ("lobby".startsWith(args[1])) {
+						if (args[1].equalsIgnoreCase("lobby")) {
+							return tab;
+						} else {
+							tab.addAll(Arrays.asList("lobby"));
+						}
+					}
+					// spawn
+					else if ("spawn".startsWith(args[1])) {
+						if (args[1].equalsIgnoreCase("spawn")) {
+							if (args.length == 2) {
+								return tab;
+							}
+							if (args[2].length() == 0) {
+								// teamlist
+								List<String> teams = getTeams();
+								tab = new ArrayList<String>(teams);
+							}
+						} else {
+							tab.addAll(Arrays.asList("spawn"));
+						}
+					}
 
-																		// last argument
+				} else {
+					tab.addAll(Arrays.asList("set"));
+				}
+			}
 
-																	} else {
-																		tab.addAll(Arrays.asList(armor));
-																	}
-																}
+			// spect
+			else if ("spect".startsWith(args[0])) {
+				if (args[0].equalsIgnoreCase("spect")) {
+					if (args.length == 1) {
+						return tab;
+					}
+					if (args[1].length() == 0) {
+						tab.addAll(Arrays.asList("add", "remove"));
+					}
+					// add
+					else if ("add".startsWith(args[1])) {
+						if (args[1].equalsIgnoreCase("add")) {
+							if (args.length == 2) {
+								return tab;
+							}
+							if (args[2].length() == 0) {
+								return null;
+							}
+						} else {
+							tab.addAll(Arrays.asList("add"));
+						}
+					}
+					// remove
+					else if ("remove".startsWith(args[1])) {
+						if (args[1].equalsIgnoreCase("remove")) {
+							if (args.length == 2) {
+								return tab;
+							}
+							if (args[2].length() == 0) {
+								return null;
+							}
+						} else {
+							tab.addAll(Arrays.asList("remove"));
+						}
+					}
+				} else {
+					tab.addAll(Arrays.asList("spect"));
+				}
+			}
+			// stop
+			else if ("stop".startsWith(args[0])) {
+				if (args[0].equalsIgnoreCase("stop")) {
+					return tab;
+				} else {
+					tab.addAll(Arrays.asList("stop"));
+				}
+			}
+			// teams
+			else if ("teams".startsWith(args[0])) {
+				if (args[0].equalsIgnoreCase("teams")) {
+					if (args.length == 1) {
+						return tab;
+					}
+					if (args[1].length() == 0) {
+						tab.addAll(Arrays.asList("add", "list", "remove"));
+					}
+					// add
+					else if ("add".startsWith(args[1])) {
+						if (args[1].equalsIgnoreCase("add")) {
+							if (args.length == 2) {
+								return tab;
+							}
+							if (args[2].length() == 0) {
+
+								// チーム名なのでsuggestはなし
+
+							} else {
+								if (args.length == 3) {
+									return tab;
+								}
+								List<String> colorList = getColors();
+								if (args[3].length() == 0) {
+									tab.addAll(colorList);
+								} else {
+									for (String color : colorList) {
+										if (color.startsWith(args[3])) {
+											if (args[3].equalsIgnoreCase(color)) {
+												if (args.length == 4) {
+													return tab;
+												}
+												List<String> armorList = getArmors();
+												if (args[4].length() == 0) {
+													tab.addAll(armorList);
+												} else {
+													for (String armor : armorList) {
+														if (armor
+																.startsWith(args[4])) {
+															if (args[4]
+																	.equalsIgnoreCase(armor)) {
+
+																return tab;
+
+															} else {
+																tab.addAll(Arrays
+																		.asList(armor));
 															}
 														}
-													} else {
-														tab.addAll(Arrays.asList(color));
-														break;
 													}
 												}
+											} else {
+												tab.addAll(Arrays.asList(color));
+												break;
 											}
 										}
 									}
-								} else {
-									tab.addAll(Arrays.asList("add"));
 								}
 							}
-							// list
-							if ("list".startsWith(args[1])) {
-								if (args[1].equalsIgnoreCase("list")) {
-									// last argument
-								}
-							}
-
-							// remove
-							if ("remove".startsWith(args[1])) {
-								if (args[1].equalsIgnoreCase("remove")) {
-									if (args.length == 3
-											&& args[2].length() == 0) {
-										// teamlist
-										tab = new ArrayList<String>(teams);
-									}
-								} else {
-									tab.addAll(Arrays.asList("remove"));
-								}
-							}
+						} else {
+							tab.addAll(Arrays.asList("add"));
 						}
-					} else {
-						tab.addAll(Arrays.asList("teams"));
 					}
+
+					// list
+					if ("list".startsWith(args[1])) {
+						if (args[1].equalsIgnoreCase("list")) {
+							return tab;
+						}
+					}
+
+					// remove
+					if ("remove".startsWith(args[1])) {
+						if (args[1].equalsIgnoreCase("remove")) {
+							if (args.length == 2) {
+								return tab;
+							}
+							if (args[2].length() == 0) {
+								// teamlist
+								List<String> teams = getTeams();
+								tab = new ArrayList<String>(teams);
+							}
+						} else {
+							tab.addAll(Arrays.asList("remove"));
+						}
+					}
+
+				} else {
+					tab.addAll(Arrays.asList("teams"));
 				}
 			}
+
 			return tab;
 
-		}else{
+		} else {
 			tab.addAll(Arrays.asList("sbb"));
 			return tab;
 		}

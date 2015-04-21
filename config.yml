@@ -1,20 +1,50 @@
 # default config.yml
+Mode: random
 LocationItem: WOOD_SPADE
 Team:
   Names:
     - Red
     - Blue
 Red:
-  Color: Åòc
+  Color: RED
   Armor: IRON
 Blue:
-  Color: Åò9
+  Color: BLUE
   Armor: DIAMOND
 Game:
-  SnowBallStacks: 2
+  SnowBallStacks: 2 #stacks
   GiveSnowBallNum: 5 #num
   GiveSnowBallTime: 30 #seconds
   GameTime: 5  #minutes
-  InvincibleTime: 20  #ticks (20tick = 1second) 
+  InvincibleTime: 20 #ticks (20tick = 1second) 
+Item:
+  TripleShot:
+    Active: false #boolean
+    Duration: 20 #sec
+    Item: 
+      ==: org.bukkit.inventory.ItemStack
+      type: DIAMOND_BLOCK
+    Numbers: 0
+  Invisible:
+    Active: false #boolean
+    Duration: 10 #sec
+    Item: 
+      ==: org.bukkit.inventory.ItemStack
+      type: BEACON
+    Numbers: 0
+  SpeedUp:
+    Active: false #boolean
+    Duration: 10 #sec
+    Item: 
+      ==: org.bukkit.inventory.ItemStack
+      type: MINECART
+    Numbers: 0
+  SpawnCannon:
+    Active: false #boolean
+    Duration: 60 #sec
+    Item: 
+      ==: org.bukkit.inventory.ItemStack
+      type: PUMPKIN
+    Numbers: 0
 Spectator:
-  Height:20
+  Height:20 #blocks

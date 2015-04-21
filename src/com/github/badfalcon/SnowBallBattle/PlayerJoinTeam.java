@@ -17,16 +17,34 @@ public class PlayerJoinTeam {
 		this.plugin = plugin;
 	}
 
-	public void joinTeam(Player player) {
+	public void joinTeam(Player player, String teamName) {
+		Scoreboard board = SnowBallBattle.board;
+		player.setScoreboard(board);
 
-		List<String> spectatorList = plugin.getConfig().getStringList("Spectator.List");
+		Team jointeam = board.getTeam(teamName);
+
+		jointeam.addPlayer(player);
+		player.setMetadata("TeamName",
+				new FixedMetadataValue(plugin, teamName));
+		player.sendMessage(SnowBallBattle.messagePrefix + "あなたはチーム"
+				+ jointeam.getPrefix() + jointeam.getName().toString()
+				+ jointeam.getSuffix() + "へ参加しました。");
+		SnowBallBattle.board.getObjective("Pscore").getScore(player)
+				.setScore(0);
+	}
+
+	public void joinRandomTeam(Player player) {
+
+		List<String> spectatorList = plugin.getConfig().getStringList(
+				"Spectator.List");
 
 		Scoreboard board = SnowBallBattle.board;
 		player.setScoreboard(board);
 
 		if (!spectatorList.contains(player.getName())) {
 
-			List<String> teamNames = plugin.getConfig().getStringList("Team.Names");
+			List<String> teamNames = plugin.getConfig().getStringList(
+					"Team.Names");
 			List<Integer> teamsizes = new ArrayList<Integer>();
 
 			for (String team : teamNames) {
@@ -44,12 +62,12 @@ public class PlayerJoinTeam {
 					jointeam.addPlayer(player);
 					player.setMetadata("TeamName", new FixedMetadataValue(
 							plugin, teamNames.get(teamnumber)));
-					player.sendMessage(SnowBallBattle.messagePrefix + "あなたはチーム" + jointeam.getPrefix()
+					player.sendMessage(SnowBallBattle.messagePrefix + "あなたはチーム"
+							+ jointeam.getPrefix()
 							+ jointeam.getName().toString()
-							+ jointeam.getSuffix()
-							+ "へ参加しました。");
+							+ jointeam.getSuffix() + "へ参加しました。");
 					SnowBallBattle.board.getObjective("Pscore")
-					.getScore(player).setScore(0);
+							.getScore(player).setScore(0);
 					break;
 				}
 			}

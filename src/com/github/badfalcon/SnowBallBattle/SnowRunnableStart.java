@@ -28,75 +28,79 @@ public class SnowRunnableStart extends BukkitRunnable {
 
 	public void run() {
 		for (Player player : Bukkit.getOnlinePlayers()) {
-			player.playSound(player.getLocation(), Sound.LEVEL_UP, 1,
-					1);
-			player.sendMessage("t:" + plugin.getConfig().getInt("Game.GameTime") * 60);
+			player.playSound(player.getLocation(), Sound.LEVEL_UP, 1, 1);
 		}
-		plugin.getServer().broadcastMessage(SnowBallBattle.messagePrefix + "ゲームを開始します。");
-
+		plugin.getServer().broadcastMessage(
+				SnowBallBattle.messagePrefix + "ゲームを開始します。");
 
 		List<String> TeamNames = plugin.getConfig().getStringList("Team.Names");
 		HashMap<String, ItemStack[]> armors = new HashMap<String, ItemStack[]>();
 		for (String teamName : TeamNames) {
-			String ConfigArmorType = plugin.getConfig().getString(teamName + ".Armor");
+			String ConfigArmorType = plugin.getConfig().getString(
+					teamName + ".Armor");
 			ItemStack[] armor = new ItemStack[4];
-			armor[0] = new ItemStack(Material.getMaterial(ConfigArmorType + "_BOOTS"));
-			armor[0] = new ItemStack(Material.getMaterial(ConfigArmorType + "_LEGGINGS"));
-			armor[0] = new ItemStack(Material.getMaterial(ConfigArmorType + "_CHESTPLATE"));
-			armor[0] = new ItemStack(Material.getMaterial(ConfigArmorType + "_HELMET"));
-			armors.put(ConfigArmorType, armor);
+			armor[0] = new ItemStack(Material.getMaterial(ConfigArmorType
+					+ "_BOOTS"));
+			armor[1] = new ItemStack(Material.getMaterial(ConfigArmorType
+					+ "_LEGGINGS"));
+			armor[2] = new ItemStack(Material.getMaterial(ConfigArmorType
+					+ "_CHESTPLATE"));
+			armor[3] = new ItemStack(Material.getMaterial(ConfigArmorType
+					+ "_HELMET"));
+			armors.put(teamName, armor);
 		}
-		/*
-			String[] configarmor = plugin.getConfig().getStringList("Team.TeamArmor").toArray(new String[0]);
-			String[][] armors = new String[configarmor.length][4];
-			ItemStack[][] armor = new ItemStack[configarmor.length][4];
-			for (int i = 0; i < armors.length; i++) {
-				armors[i][0] = configarmor[i] + "_BOOTS";
-				armors[i][1] = configarmor[i] + "_LEGGINGS";
-				armors[i][2] = configarmor[i] + "_CHESTPLATE";
-				armors[i][3] = configarmor[i] + "_HELMET";
-				for (int j = 0; j < 4; j++) {
-					armor[i][j] = new ItemStack(Material.getMaterial(armors[i][j]));
-				}
-			}
-		*/
+
 		ItemStack[] sb = new ItemStack[36];
-		for (int i = 0; i < plugin.getConfig().getInt("Game.SnowBallStacks"); i++) {
-			sb[i] = new ItemStack(Material.SNOW_BALL, 16);
+
+		// sb[8] = new ItemStack(Material.COMPASS);
+
+		int i = 0;
+		int n = 0;
+		while (n < plugin.getConfig().getInt("Game.SnowBallStacks")) {
+			if (sb[i] == null) {
+				sb[i] = new ItemStack(Material.SNOW_BALL, 16);
+				n++;
+			}
+			i++;
 		}
+		Bukkit.getWorlds().get(0).removeMetadata("ready", plugin);
+		double specHeight = plugin.getConfig().getDouble("Spectator.Height");
 		for (Player player : players) {
-			if (!spec.isSpectator(player.getName())) {
+			if (!Spectator.isSpectating(player)) {
 				if (player.getGameMode().equals(GameMode.CREATIVE)) {
 					player.setGameMode(GameMode.SURVIVAL);
 				}
-				Bukkit.getWorlds().get(0).removeMetadata("ready", plugin);
 				player.setLevel(0);
-				String teamName = player.getMetadata("TeamName").get(0).asString();
+				String teamName = player.getMetadata("TeamName").get(0)
+						.asString();
 				player.getInventory().clear();
 				player.getInventory().setArmorContents(armors.get(teamName));
 				player.getInventory().setContents(sb);
 				player.setWalkSpeed(0.2F);
 			} else {
-				spec.setSpectate(player);
 				Location l = player.getLocation();
-				l.setY(plugin.getConfig().getDouble(
-						"Spectator.Height"));
-				player.teleport(l);
+				if (l.getY() < specHeight) {
+					l.setY(specHeight);
+					player.teleport(l);
+				}
 			}
 		}
 		for (Player player : players) {
 			if (!spec.isSpectator(player.getName())) {
 				for (Player player2 : players) {
-					if (!spec.isSpectating(player2)) {
+					if (!Spectator.isSpectating(player2)) {
 						player.showPlayer(player2);
 					}
 				}
 			}
 		}
 
-		Bukkit.getWorlds().get(0).setMetadata("ingame",
-				new FixedMetadataValue(plugin, true));
+		Bukkit.getWorlds().get(0)
+				.setMetadata("ingame", new FixedMetadataValue(plugin, true));
 		long startTime = new Date().getTime();
-		Bukkit.getWorlds().get(0).setMetadata("gameStart", new FixedMetadataValue(plugin, startTime));
+		Bukkit.getWorlds()
+				.get(0)
+				.setMetadata("gameStart",
+						new FixedMetadataValue(plugin, startTime));
 	}
 }

@@ -8,7 +8,7 @@ import org.bukkit.scoreboard.ScoreboardManager;
 
 public class SnowBallBattle extends JavaPlugin {
 
-	final static String messagePrefix = "[雪合戦] ";
+	final static String messagePrefix = "[フローズンファイト] ";
 
 	private SnowCommandExecutor snowExecutor;
 	private SnowTabCompleter snowCompleter;
@@ -20,6 +20,7 @@ public class SnowBallBattle extends JavaPlugin {
 		this.saveDefaultConfig();
 
 		ScoreboardManager manager = Bukkit.getScoreboardManager();
+
 		board = manager.getNewScoreboard();
 		new SnowScoreboard(this).setScoreboard();
 		snowExecutor = new SnowCommandExecutor(this);
@@ -32,4 +33,5 @@ public class SnowBallBattle extends JavaPlugin {
 		pm.registerEvents(new SnowListener(this), this);
 
 	}
+
 }

@@ -23,8 +23,7 @@ public class Spectator {
 		player.setFlySpeed(0.7F);
 		if (plugin.getConfig().contains("Spectator.Height")) {
 			Location location = player.getLocation();
-			location.setY(location.getY()
-					+ plugin.getConfig().getInt("Spectator.Height"));
+			location.setY(plugin.getConfig().getInt("Spectator.Height"));
 			player.teleport(location);
 		}
 		player.setMetadata("spectating", new FixedMetadataValue(plugin, true));
@@ -74,7 +73,7 @@ public class Spectator {
 		}
 	}
 
-	public boolean isSpectating(Player player) {
+	public static boolean isSpectating(Player player) {
 		if (player.hasMetadata("spectating")) {
 			return true;
 		} else {
