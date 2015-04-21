@@ -88,8 +88,6 @@ public class SnowListener implements Listener {
 
 		// モードの確認
 
-
-
 		// ロビーがconfigに存在する場合に、設定する
 		if (config.contains("lobby")) {
 			Vector lobby = config.getVector("lobby");
@@ -100,13 +98,13 @@ public class SnowListener implements Listener {
 		}
 
 		List<String> teamNames = config.getStringList("Team.Names");
-//		int n = 0;
+		// int n = 0;
 		for (String teamName : teamNames) {
-			if(config.getString("Mode").equals("premade")){
+			if (config.getString("Mode").equals("premade")) {
 				if (!config.contains(teamName + ".Members")) {
 					config.set(teamName + ".Members", Arrays.asList());
 				}
-	//			n++;
+				// n++;
 			}
 
 			if (config.contains(teamName + ".Respawn")) {
@@ -166,36 +164,18 @@ public class SnowListener implements Listener {
 
 			// ゲーム中
 
-			if (player.hasMetadata("team")) {
+			if (player.hasMetadata("teamName")) {
 
 				// チームに所属している時
 
 				if (world.hasMetadata("gameStart")) {
-
-					if (player.getLastPlayed() == 0) {
-
-						// 初参加の時
-
-						player.sendMessage(SnowBallBattle.messagePrefix
-								+ "現在のゲームが終了するまでお待ちください。");
-						player.setScoreboard(SnowBallBattle.board);
-						spec.setSpectate(player);
-						for (Player player1 : Bukkit.getOnlinePlayers()) {
-							if (!Spectator.isSpectating(player1)) {
-
-								// 観戦者を隠す
-								player1.hidePlayer(player);
-							}
-						}
-
-					}
 
 					if (player.getLastPlayed() < world.getMetadata("gameStart")
 							.get(0).asLong()) {
 
 						// この試合に参加していない場合
 
-						player.removeMetadata("team", plugin);
+						player.removeMetadata("teamName", plugin);
 						player.removeMetadata("teamnumber", plugin);
 						player.removeMetadata("teamcolor", plugin);
 						player.removeMetadata("spectator", plugin);
@@ -241,12 +221,12 @@ public class SnowListener implements Listener {
 
 		} else {
 
-			if(Spectator.isSpectating(player)){
+			if (Spectator.isSpectating(player)) {
 				new Spectator(plugin).removeSpectate(player);
 			}
 
 			// ゲーム外
-			player.removeMetadata("team", plugin);
+			player.removeMetadata("teamName", plugin);
 			player.removeMetadata("teamnumber", plugin);
 			player.removeMetadata("teamcolor", plugin);
 			player.removeMetadata("spectator", plugin);

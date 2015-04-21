@@ -243,7 +243,7 @@ public class SnowCommandExecutor implements CommandExecutor {
 						Player obj = Bukkit.getPlayer(args[2]);
 						sender.sendMessage(SnowBallBattle.messagePrefix
 								+ args[2] + " team:"
-								+ obj.getMetadata("team").get(0).asString());
+								+ obj.getMetadata("teamName").get(0).asString());
 						return true;
 					} else {
 						return true;

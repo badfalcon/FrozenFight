@@ -132,8 +132,6 @@ public class SnowRunnableFinish extends BukkitRunnable {
 				player.removeMetadata("TeamName", plugin);
 				// SnowBallBattle.board.getObjective("Tscore").setDisplayName("Time  finished");
 				BarAPI.setMessage(player, "残り時間  finished");
-			} else {
-				spec.removeSpectate(player);
 			}
 			for (Player player1 : players) {
 				if (!player.canSee(player1)) {
@@ -160,6 +158,9 @@ public class SnowRunnableFinish extends BukkitRunnable {
 			snowboard.resetScore();
 			for (Player player : players) {
 				BarAPI.removeBar(player);
+				if(Spectator.isSpectating(player)){
+					spec.removeSpectate(player);
+				}
 				if (spec.isSpectator(player.getName())) {
 					spec.removeSpectate(player);
 				}
