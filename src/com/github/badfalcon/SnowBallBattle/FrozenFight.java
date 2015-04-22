@@ -6,12 +6,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
 
-public class SnowBallBattle extends JavaPlugin {
+public class FrozenFight extends JavaPlugin {
 
 	final static String messagePrefix = "[フローズンファイト] ";
 
-	private SnowCommandExecutor snowExecutor;
-	private SnowTabCompleter snowCompleter;
+	private FFCommandExecutor snowExecutor;
+	private FFTabCompleter snowCompleter;
 
 	static Scoreboard board;
 
@@ -22,15 +22,15 @@ public class SnowBallBattle extends JavaPlugin {
 		ScoreboardManager manager = Bukkit.getScoreboardManager();
 
 		board = manager.getNewScoreboard();
-		new SnowScoreboard(this).setScoreboard();
-		snowExecutor = new SnowCommandExecutor(this);
-		snowCompleter = new SnowTabCompleter(this);
+		new FFScoreboard(this).setScoreboard();
+		snowExecutor = new FFCommandExecutor(this);
+		snowCompleter = new FFTabCompleter(this);
 		getCommand("sbb").setExecutor(snowExecutor);
 		getCommand("lobby").setExecutor(snowExecutor);
 		getCommand("sbb").setTabCompleter(snowCompleter);
 
 		PluginManager pm = this.getServer().getPluginManager();
-		pm.registerEvents(new SnowListener(this), this);
+		pm.registerEvents(new FFListener(this), this);
 
 	}
 

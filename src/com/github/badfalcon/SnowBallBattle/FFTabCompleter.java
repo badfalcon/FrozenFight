@@ -9,11 +9,11 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 
-public class SnowTabCompleter implements TabCompleter {
+public class FFTabCompleter implements TabCompleter {
 
-	SnowBallBattle plugin;
+	FrozenFight plugin;
 
-	public SnowTabCompleter(SnowBallBattle plugin) {
+	public FFTabCompleter(FrozenFight plugin) {
 		this.plugin = plugin;
 	}
 
@@ -25,9 +25,9 @@ public class SnowTabCompleter implements TabCompleter {
 	}
 
 	public List<String> getItems() {
-		SnowItem[] snowItem = SnowItem.values();
+		FFItem[] snowItem = FFItem.values();
 		List<String> list = new ArrayList<String>();
-		for (SnowItem itemName : snowItem) {
+		for (FFItem itemName : snowItem) {
 			list.add(itemName.name());
 		}
 		return list;

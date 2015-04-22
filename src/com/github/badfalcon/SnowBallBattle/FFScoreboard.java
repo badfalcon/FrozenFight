@@ -16,14 +16,14 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 import org.bukkit.util.Vector;
 
-public class SnowScoreboard {
+public class FFScoreboard {
 
-	SnowBallBattle plugin;
+	FrozenFight plugin;
 	Scoreboard board;
 
-	public SnowScoreboard(SnowBallBattle plugin) {
+	public FFScoreboard(FrozenFight plugin) {
 		this.plugin = plugin;
-		this.board = SnowBallBattle.board;
+		this.board = FrozenFight.board;
 	}
 
 	World world = Bukkit.getWorlds().get(0);

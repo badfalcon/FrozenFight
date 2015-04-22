@@ -14,11 +14,11 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
-public class SpawnItems extends BukkitRunnable {
-	private SnowBallBattle plugin;
+public class FFSpawnItems extends BukkitRunnable {
+	private FrozenFight plugin;
 	static List<BukkitTask> spawnItems;
 
-	public SpawnItems(SnowBallBattle plugin) {
+	public FFSpawnItems(FrozenFight plugin) {
 		this.plugin = plugin;
 	}
 
@@ -27,9 +27,9 @@ public class SpawnItems extends BukkitRunnable {
 		World world = plugin.getServer().getWorlds().get(0);
 		FileConfiguration config = plugin.getConfig();
 
-		SnowItem[] itemNames = SnowItem.values();
+		FFItem[] itemNames = FFItem.values();
 		spawnItems = new ArrayList<BukkitTask>();
-		for (SnowItem item : itemNames) {
+		for (FFItem item : itemNames) {
 			String itemName = item.name();
 			Boolean itemActive = config.getBoolean("Item." + itemName
 					+ ".Active");

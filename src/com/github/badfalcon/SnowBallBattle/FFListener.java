@@ -51,16 +51,16 @@ import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Team;
 import org.bukkit.util.Vector;
 
-public class SnowListener implements Listener {
+public class FFListener implements Listener {
 
-	SnowBallBattle plugin;
-	Spectator spec;
-	SnowScoreboard snowboard;
+	FrozenFight plugin;
+	FFSpectator spec;
+	FFScoreboard snowboard;
 	World world;
 
-	public SnowListener(SnowBallBattle plugin) {
+	public FFListener(FrozenFight plugin) {
 		this.plugin = plugin;
-		spec = new Spectator(this.plugin);
+		spec = new FFSpectator(this.plugin);
 		world = Bukkit.getServer().getWorlds().get(0);
 	}
 
@@ -77,7 +77,7 @@ public class SnowListener implements Listener {
 
 		// ゲーム中ならば、ゲーム停止
 		if (world.hasMetadata("ingame")) {
-			new SnowRunnableFinish(this.plugin).run();
+			new FFRunnableFinish(this.plugin).run();
 		}
 
 		// チーム数の確認
@@ -92,7 +92,7 @@ public class SnowListener implements Listener {
 		if (config.contains("lobby")) {
 			Vector lobby = config.getVector("lobby");
 			float lobbyyaw = config.getFloatList("lobbyyaw").get(0);
-			new SnowLobby(plugin).setLobby(lobby, lobbyyaw);
+			new FFLobby(plugin).setLobby(lobby, lobbyyaw);
 		} else {
 			missing.add("ロビー");
 		}
@@ -143,14 +143,14 @@ public class SnowListener implements Listener {
 				}
 			}
 			Bukkit.getLogger().info(
-					SnowBallBattle.messagePrefix + "ゲームを開始するには、" + miss
+					FrozenFight.messagePrefix + "ゲームを開始するには、" + miss
 							+ "を設定してください。");
 		} else {
 			Bukkit.getLogger().info(
-					SnowBallBattle.messagePrefix + "ゲームを開始する準備は完了しています。");
+					FrozenFight.messagePrefix + "ゲームを開始する準備は完了しています。");
 		}
 		for (Player player : Bukkit.getOnlinePlayers()) {
-			player.setScoreboard(SnowBallBattle.board);
+			player.setScoreboard(FrozenFight.board);
 		}
 	}
 
@@ -180,12 +180,12 @@ public class SnowListener implements Listener {
 						player.removeMetadata("teamcolor", plugin);
 						player.removeMetadata("spectator", plugin);
 
-						player.sendMessage(SnowBallBattle.messagePrefix
+						player.sendMessage(FrozenFight.messagePrefix
 								+ "現在のゲームが終了するまでお待ちください。");
-						player.setScoreboard(SnowBallBattle.board);
+						player.setScoreboard(FrozenFight.board);
 						spec.setSpectate(player);
 						for (Player player1 : Bukkit.getOnlinePlayers()) {
-							if (!Spectator.isSpectating(player1)) {
+							if (!FFSpectator.isSpectating(player1)) {
 
 								// 観戦者を隠す
 								player1.hidePlayer(player);
@@ -205,12 +205,12 @@ public class SnowListener implements Listener {
 
 				// チームに所属していない時
 
-				player.sendMessage(SnowBallBattle.messagePrefix
+				player.sendMessage(FrozenFight.messagePrefix
 						+ "現在のゲームが終了するまでお待ちください。");
-				player.setScoreboard(SnowBallBattle.board);
+				player.setScoreboard(FrozenFight.board);
 				spec.setSpectate(player);
 				for (Player player1 : Bukkit.getOnlinePlayers()) {
-					if (!Spectator.isSpectating(player1)) {
+					if (!FFSpectator.isSpectating(player1)) {
 
 						// 観戦者を隠す
 
@@ -221,8 +221,8 @@ public class SnowListener implements Listener {
 
 		} else {
 
-			if (Spectator.isSpectating(player)) {
-				new Spectator(plugin).removeSpectate(player);
+			if (FFSpectator.isSpectating(player)) {
+				new FFSpectator(plugin).removeSpectate(player);
 			}
 
 			// ゲーム外
@@ -257,13 +257,13 @@ public class SnowListener implements Listener {
 			// ゲーム中
 
 			Player player = event.getPlayer();
-			if (!Spectator.isSpectating(player)) {
+			if (!FFSpectator.isSpectating(player)) {
 
 				// 観戦者
 
 				event.setCancelled(true);
 				event.getPlayer().sendMessage(
-						SnowBallBattle.messagePrefix + "ゲーム中はゲームモードの変更はできません。");
+						FrozenFight.messagePrefix + "ゲーム中はゲームモードの変更はできません。");
 
 			}
 		}
@@ -320,7 +320,7 @@ public class SnowListener implements Listener {
 														.getYaw())));
 								player.setMetadata("Location",
 										new FixedMetadataValue(plugin, true));
-								player.sendMessage(SnowBallBattle.messagePrefix
+								player.sendMessage(FrozenFight.messagePrefix
 										+ loc.getBlockX() + 0.5 + " , "
 										+ loc.getBlockY() + " , "
 										+ loc.getBlockZ() + 0.5 + " を記録しました。");
@@ -392,7 +392,7 @@ public class SnowListener implements Listener {
 						new FixedMetadataValue(plugin, true));
 
 				plugin.getServer().broadcastMessage(
-						SnowBallBattle.messagePrefix + p.getName()
+						FrozenFight.messagePrefix + p.getName()
 								+ "の雪球が3ウェイになった!!");
 
 				// 削除タスク
@@ -414,7 +414,7 @@ public class SnowListener implements Listener {
 				p.setMetadata("Invisible", new FixedMetadataValue(plugin, true));
 
 				plugin.getServer().broadcastMessage(
-						SnowBallBattle.messagePrefix + p.getName()
+						FrozenFight.messagePrefix + p.getName()
 								+ "が透明になった!!");
 
 				// 削除タスク
@@ -434,7 +434,7 @@ public class SnowListener implements Listener {
 				p.setMetadata("SpeedUp", new FixedMetadataValue(plugin, true));
 
 				plugin.getServer().broadcastMessage(
-						SnowBallBattle.messagePrefix + p.getName()
+						FrozenFight.messagePrefix + p.getName()
 								+ "の足が速くなった!!");
 
 				// 削除タスク
@@ -452,7 +452,7 @@ public class SnowListener implements Listener {
 				new SpawnCannon(p, dur / 2).runTaskTimer(plugin, 0, 40);
 
 				plugin.getServer().broadcastMessage(
-						SnowBallBattle.messagePrefix + p.getName()
+						FrozenFight.messagePrefix + p.getName()
 								+ "が雪だるまを召喚した!!");
 
 			}
@@ -663,7 +663,7 @@ public class SnowListener implements Listener {
 
 			// 準備中
 
-			if (!Spectator.isSpectating(player)) {
+			if (!FFSpectator.isSpectating(player)) {
 
 				// 観戦者ではない時
 
@@ -691,7 +691,7 @@ public class SnowListener implements Listener {
 
 			// ゲーム中
 
-			if (Spectator.isSpectating(player)) {
+			if (FFSpectator.isSpectating(player)) {
 
 				// 観戦中
 
@@ -708,7 +708,7 @@ public class SnowListener implements Listener {
 					player.teleport(loc);
 					player.setFlying(true);
 
-					player.sendMessage(SnowBallBattle.messagePrefix
+					player.sendMessage(FrozenFight.messagePrefix
 							+ " ゲームに干渉するおそれがるため、これより下にはいけません。");
 
 				}
@@ -806,7 +806,7 @@ public class SnowListener implements Listener {
 				Bukkit.getLogger().info(
 						shooter.getName() + "→" + hitPlayer.getName());
 
-				if (!Spectator.isSpectating(hitPlayer)
+				if (!FFSpectator.isSpectating(hitPlayer)
 						&& hitPlayer.getNoDamageTicks() == 0) {
 
 					// 試合中かつ無敵時間じゃない場合
@@ -859,11 +859,11 @@ public class SnowListener implements Listener {
 
 						// スコア追加
 
-						Team shooterTeam = SnowBallBattle.board
+						Team shooterTeam = FrozenFight.board
 								.getTeam(shooterTeamName);
-						Score personalScore = SnowBallBattle.board
+						Score personalScore = FrozenFight.board
 								.getObjective("Pscore").getScore(shooter);
-						Score teamScore = SnowBallBattle.board.getObjective(
+						Score teamScore = FrozenFight.board.getObjective(
 								"Tscore").getScore(
 								Bukkit.getOfflinePlayer(shooterTeam.getPrefix()
 										+ shooterTeamName
@@ -875,7 +875,7 @@ public class SnowListener implements Listener {
 								Sound.SUCCESSFUL_HIT, 1, 1);
 						shooter.giveExpLevels(1);
 						for (Player player : Bukkit.getOnlinePlayers()) {
-							player.sendMessage(SnowBallBattle.messagePrefix
+							player.sendMessage(FrozenFight.messagePrefix
 									+ "" + shooterTeam.getPrefix()
 									+ shooterTeam.getName() + " + 1pt! "
 									+ ChatColor.RESET + " ("

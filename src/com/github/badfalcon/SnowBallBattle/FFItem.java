@@ -1,6 +1,6 @@
 package com.github.badfalcon.SnowBallBattle;
 
-public enum SnowItem {
+public enum FFItem {
 	TripleShot,
 	Invisible,
 	SpeedUp,

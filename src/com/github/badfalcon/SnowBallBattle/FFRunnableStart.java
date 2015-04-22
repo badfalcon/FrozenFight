@@ -14,15 +14,15 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
 
-public class SnowRunnableStart extends BukkitRunnable {
+public class FFRunnableStart extends BukkitRunnable {
 
-	SnowBallBattle plugin;
-	Spectator spec;
+	FrozenFight plugin;
+	FFSpectator spec;
 	Player[] players;
 
-	public SnowRunnableStart(SnowBallBattle plugin) {
+	public FFRunnableStart(FrozenFight plugin) {
 		this.plugin = plugin;
-		spec = new Spectator(plugin);
+		spec = new FFSpectator(plugin);
 		players = Bukkit.getOnlinePlayers();
 	}
 
@@ -31,7 +31,7 @@ public class SnowRunnableStart extends BukkitRunnable {
 			player.playSound(player.getLocation(), Sound.LEVEL_UP, 1, 1);
 		}
 		plugin.getServer().broadcastMessage(
-				SnowBallBattle.messagePrefix + "ゲームを開始します。");
+				FrozenFight.messagePrefix + "ゲームを開始します。");
 
 		List<String> TeamNames = plugin.getConfig().getStringList("Team.Names");
 		HashMap<String, ItemStack[]> armors = new HashMap<String, ItemStack[]>();
@@ -66,7 +66,7 @@ public class SnowRunnableStart extends BukkitRunnable {
 		Bukkit.getWorlds().get(0).removeMetadata("ready", plugin);
 		double specHeight = plugin.getConfig().getDouble("Spectator.Height");
 		for (Player player : players) {
-			if (!Spectator.isSpectating(player)) {
+			if (!FFSpectator.isSpectating(player)) {
 				if (player.getGameMode().equals(GameMode.CREATIVE)) {
 					player.setGameMode(GameMode.SURVIVAL);
 				}
@@ -88,7 +88,7 @@ public class SnowRunnableStart extends BukkitRunnable {
 		for (Player player : players) {
 			if (!spec.isSpectator(player.getName())) {
 				for (Player player2 : players) {
-					if (!Spectator.isSpectating(player2)) {
+					if (!FFSpectator.isSpectating(player2)) {
 						player.showPlayer(player2);
 					}
 				}
