@@ -1,4 +1,4 @@
-package com.github.badfalcon.SnowBallBattle;
+package com.gmail.badfalcon610.FrozenFight;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -8,11 +8,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.util.Vector;
 
-public class SnowLobby {
+public class FFLobby {
 
-	SnowBallBattle plugin;
+	FrozenFight plugin;
 
-	public SnowLobby(SnowBallBattle plugin) {
+	public FFLobby(FrozenFight plugin) {
 		this.plugin = plugin;
 	}
 
@@ -28,7 +28,7 @@ public class SnowLobby {
 			float lobbyyaw = world.getMetadata("lobbyyaw").get(0).asFloat();
 			lobby = new Location(world, lobbyx, lobbyy + 1, lobbyz, lobbyyaw, 0);
 			player.teleport(lobby);
-			player.sendMessage(SnowBallBattle.messagePrefix + "ロビーへワープしました。");
+			player.sendMessage(FrozenFight.messagePrefix + "ロビーへワープしました。");
 		} else {
 			Bukkit.getLogger().info(ChatColor.RED + "ロビーが設定されていません。");
 		}

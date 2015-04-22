@@ -1,4 +1,4 @@
-package com.github.badfalcon.SnowBallBattle;
+package com.gmail.badfalcon610.FrozenFight;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,15 +17,15 @@ import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Team;
 
-public class SnowRunnableFinish extends BukkitRunnable {
+public class FFRunnableFinish extends BukkitRunnable {
 
-	private SnowBallBattle plugin;
+	private FrozenFight plugin;
 	BukkitTask send;
-	Spectator spec;
+	FFSpectator spec;
 
-	public SnowRunnableFinish(SnowBallBattle plugin) {
+	public FFRunnableFinish(FrozenFight plugin) {
 		this.plugin = plugin;
-		spec = new Spectator(plugin);
+		spec = new FFSpectator(plugin);
 	}
 
 	public void run() {
@@ -41,10 +41,10 @@ public class SnowRunnableFinish extends BukkitRunnable {
 		List<String> teamNames = plugin.getConfig().getStringList("Team.Names");
 		int winnerscore = 0;
 		for (String teamName : teamNames) {
-			Team t = SnowBallBattle.board.getTeam(teamName);
+			Team t = FrozenFight.board.getTeam(teamName);
 			OfflinePlayer team = Bukkit.getOfflinePlayer(t.getPrefix()
 					+ teamName + t.getSuffix());
-			Score tsc = SnowBallBattle.board.getObjective("Tscore").getScore(
+			Score tsc = FrozenFight.board.getObjective("Tscore").getScore(
 					team);
 			if (tsc.getScore() > winnerscore) {
 				winnerTeams = new ArrayList<OfflinePlayer>();
@@ -56,7 +56,7 @@ public class SnowRunnableFinish extends BukkitRunnable {
 		}
 		String winnerNames = "";
 		for (OfflinePlayer winner : winnerTeams) {
-			Team winnerTeam = SnowBallBattle.board.getTeam(ChatColor
+			Team winnerTeam = FrozenFight.board.getTeam(ChatColor
 					.stripColor(winner.getName()));
 			String winnerName = winnerTeam.getPrefix() + winner.getName()
 					+ winnerTeam.getSuffix();
@@ -69,8 +69,8 @@ public class SnowRunnableFinish extends BukkitRunnable {
 		List<OfflinePlayer> mvpPlayers = new ArrayList<OfflinePlayer>();
 		int mvpscore = 0;
 		for (Player player : players) {
-			if (!Spectator.isSpectating(player)) {
-				Score sc = SnowBallBattle.board.getObjective("Pscore")
+			if (!FFSpectator.isSpectating(player)) {
+				Score sc = FrozenFight.board.getObjective("Pscore")
 						.getScore(player);
 				if (sc.getScore() > mvpscore) {
 					mvpPlayers = new ArrayList<OfflinePlayer>();
@@ -98,32 +98,32 @@ public class SnowRunnableFinish extends BukkitRunnable {
 		}
 
 		plugin.getServer().broadcastMessage(
-				SnowBallBattle.messagePrefix + "ゲームが終了しました。");
+				FrozenFight.messagePrefix + "ゲームが終了しました。");
 		if (winnerTeams.size() == 1) {
 			plugin.getServer().broadcastMessage(
-					SnowBallBattle.messagePrefix + "チーム" + winnerNames
+					FrozenFight.messagePrefix + "チーム" + winnerNames
 							+ "の勝利です！ スコア:" + winnerscore + "pt");
 		} else {
 			plugin.getServer().broadcastMessage(
-					SnowBallBattle.messagePrefix + "チーム" + winnerNames
+					FrozenFight.messagePrefix + "チーム" + winnerNames
 							+ "による同点に終わりました。 スコア:" + winnerscore + "pt");
 		}
 
 		plugin.getServer().broadcastMessage(
-				SnowBallBattle.messagePrefix + "この試合のMVPは" + mvpNames
+				FrozenFight.messagePrefix + "この試合のMVPは" + mvpNames
 						+ "でした。スコア:" + mvpscore + "pt");
 
 		for (Player player : players) {
-			if (!Spectator.isSpectating(player)) {
+			if (!FFSpectator.isSpectating(player)) {
 
 				// 個人成績の表示とゲームデータクリア
 
-				Score personal = SnowBallBattle.board.getObjective("Pscore")
+				Score personal = FrozenFight.board.getObjective("Pscore")
 						.getScore(player);
-				SnowBallBattle.board.getTeam(
+				FrozenFight.board.getTeam(
 						player.getMetadata("TeamName").get(0).asString())
 						.removePlayer(player);
-				player.sendMessage(SnowBallBattle.messagePrefix + "あなたのスコアは "
+				player.sendMessage(FrozenFight.messagePrefix + "あなたのスコアは "
 						+ personal.getScore() + "pt でした。");
 				player.getInventory().setArmorContents(clear);
 				player.getInventory().clear();
@@ -138,7 +138,7 @@ public class SnowRunnableFinish extends BukkitRunnable {
 					player.showPlayer(player1);
 				}
 			}
-			player.sendMessage(SnowBallBattle.messagePrefix + "ロビーへ転送します。");
+			player.sendMessage(FrozenFight.messagePrefix + "ロビーへ転送します。");
 		}
 		World world = Bukkit.getWorlds().get(0);
 		world.removeMetadata("ingame", plugin);
@@ -153,18 +153,18 @@ public class SnowRunnableFinish extends BukkitRunnable {
 
 		public void run() {
 			Player[] players = plugin.getServer().getOnlinePlayers();
-			SnowScoreboard snowboard = new SnowScoreboard(plugin);
+			FFScoreboard snowboard = new FFScoreboard(plugin);
 			snowboard.hideScore();
 			snowboard.resetScore();
 			for (Player player : players) {
 				BarAPI.removeBar(player);
-				if(Spectator.isSpectating(player)){
+				if(FFSpectator.isSpectating(player)){
 					spec.removeSpectate(player);
 				}
 				if (spec.isSpectator(player.getName())) {
 					spec.removeSpectate(player);
 				}
-				new SnowLobby(plugin).warpLobby(player);
+				new FFLobby(plugin).warpLobby(player);
 			}
 		}
 	}

@@ -1,12 +1,12 @@
 name: SnowBallBattle
-main: com.github.badfalcon.SnowBallBattle.SnowBallBattle
+main: com.github.badfalcon.FrozenFight.FrozenFight
 version: 0.9
-prefix: SBB
+prefix: FF
 commands:
    sbb:
-      description: sbb
-      usage: /sbb
-      permission: sbb
+      description: ff
+      usage: /ff
+      permission: ff
       permission-message: You don't have permission.
    lobby:
       description: lobby

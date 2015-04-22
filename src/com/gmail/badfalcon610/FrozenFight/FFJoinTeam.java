@@ -1,4 +1,4 @@
-package com.github.badfalcon.SnowBallBattle;
+package com.gmail.badfalcon610.FrozenFight;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,16 +9,16 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
-public class PlayerJoinTeam {
+public class FFJoinTeam {
 
-	SnowBallBattle plugin;
+	FrozenFight plugin;
 
-	public PlayerJoinTeam(SnowBallBattle plugin) {
+	public FFJoinTeam(FrozenFight plugin) {
 		this.plugin = plugin;
 	}
 
 	public void joinTeam(Player player, String teamName) {
-		Scoreboard board = SnowBallBattle.board;
+		Scoreboard board = FrozenFight.board;
 		player.setScoreboard(board);
 
 		Team jointeam = board.getTeam(teamName);
@@ -26,10 +26,10 @@ public class PlayerJoinTeam {
 		jointeam.addPlayer(player);
 		player.setMetadata("TeamName",
 				new FixedMetadataValue(plugin, teamName));
-		player.sendMessage(SnowBallBattle.messagePrefix + "あなたはチーム"
+		player.sendMessage(FrozenFight.messagePrefix + "あなたはチーム"
 				+ jointeam.getPrefix() + jointeam.getName().toString()
 				+ jointeam.getSuffix() + "へ参加しました。");
-		SnowBallBattle.board.getObjective("Pscore").getScore(player)
+		FrozenFight.board.getObjective("Pscore").getScore(player)
 				.setScore(0);
 	}
 
@@ -38,7 +38,7 @@ public class PlayerJoinTeam {
 		List<String> spectatorList = plugin.getConfig().getStringList(
 				"Spectator.List");
 
-		Scoreboard board = SnowBallBattle.board;
+		Scoreboard board = FrozenFight.board;
 		player.setScoreboard(board);
 
 		if (!spectatorList.contains(player.getName())) {
@@ -62,17 +62,17 @@ public class PlayerJoinTeam {
 					jointeam.addPlayer(player);
 					player.setMetadata("TeamName", new FixedMetadataValue(
 							plugin, teamNames.get(teamnumber)));
-					player.sendMessage(SnowBallBattle.messagePrefix + "あなたはチーム"
+					player.sendMessage(FrozenFight.messagePrefix + "あなたはチーム"
 							+ jointeam.getPrefix()
 							+ jointeam.getName().toString()
 							+ jointeam.getSuffix() + "へ参加しました。");
-					SnowBallBattle.board.getObjective("Pscore")
+					FrozenFight.board.getObjective("Pscore")
 							.getScore(player).setScore(0);
 					break;
 				}
 			}
 		} else {
-			player.sendMessage(SnowBallBattle.messagePrefix + "あなたは観戦者です。");
+			player.sendMessage(FrozenFight.messagePrefix + "あなたは観戦者です。");
 		}
 	}
 }

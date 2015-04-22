@@ -1,4 +1,4 @@
-package com.github.badfalcon.SnowBallBattle;
+package com.gmail.badfalcon610.FrozenFight;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,9 +29,9 @@ import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.Team;
 import org.bukkit.util.Vector;
 
-public class SnowCommandExecutor implements CommandExecutor {
+public class FFCommandExecutor implements CommandExecutor {
 
-	SnowBallBattle plugin;
+	FrozenFight plugin;
 	BukkitTask gameStart;
 	BukkitTask gameTimeCount;
 	BukkitTask spawnItem;
@@ -39,7 +39,7 @@ public class SnowCommandExecutor implements CommandExecutor {
 	boolean ingame = false;
 	int count = 10;
 
-	public SnowCommandExecutor(SnowBallBattle plugin) {
+	public FFCommandExecutor(FrozenFight plugin) {
 		this.plugin = plugin;
 	}
 
@@ -88,7 +88,7 @@ public class SnowCommandExecutor implements CommandExecutor {
 					if (gametime != maxtime && gametime != 0) {
 						int SnowNum = plugin.getConfig().getInt(
 								"Game.GiveSnowBallNum");
-						if (!Spectator.isSpectating(player)) {
+						if (!FFSpectator.isSpectating(player)) {
 							PlayerInventory inventory = player.getInventory();
 							inventory.addItem(new ItemStack(Material.SNOW_BALL,
 									SnowNum));
@@ -126,12 +126,12 @@ public class SnowCommandExecutor implements CommandExecutor {
 					}
 				}
 				for (Player player : players) {
-					player.sendMessage(SnowBallBattle.messagePrefix
+					player.sendMessage(FrozenFight.messagePrefix
 							+ "ゲーム開始まで " + countdown);
 				}
 			} else {
 				Bukkit.getServer().broadcastMessage(
-						SnowBallBattle.messagePrefix + "ゲーム開始まで" + countdown);
+						FrozenFight.messagePrefix + "ゲーム開始まで" + countdown);
 			}
 
 			if (countdown > 1) {
@@ -144,10 +144,10 @@ public class SnowCommandExecutor implements CommandExecutor {
 
 	boolean sendToLobby(CommandSender sender) {
 		if (sender instanceof Player) {
-			new SnowLobby(plugin).warpLobby((Player) sender);
+			new FFLobby(plugin).warpLobby((Player) sender);
 			return true;
 		} else {
-			sender.sendMessage(SnowBallBattle.messagePrefix + ChatColor.RED
+			sender.sendMessage(FrozenFight.messagePrefix + ChatColor.RED
 					+ "コマンドを実行したプレイヤー(" + sender.getName() + ")を特定できませんでした。");
 			return false;
 		}
@@ -157,7 +157,7 @@ public class SnowCommandExecutor implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label,
 			String[] args) {
-		Spectator spec = new Spectator(plugin);
+		FFSpectator spec = new FFSpectator(plugin);
 		/*
 		 * sender.sendMessage("command = " + cmd.getName() + "\nlength = " +
 		 * args.length); sender.sendMessage("label = " + label); for (int i = 0;
@@ -168,7 +168,7 @@ public class SnowCommandExecutor implements CommandExecutor {
 
 		if (cmd.getName().equalsIgnoreCase("lobby")) {
 			if (world.hasMetadata("ingame") || world.hasMetadata("ready")) {
-				sender.sendMessage(SnowBallBattle.messagePrefix
+				sender.sendMessage(FrozenFight.messagePrefix
 						+ "ゲーム中はこのコマンドは実行できません");
 				return true;
 			}
@@ -183,7 +183,7 @@ public class SnowCommandExecutor implements CommandExecutor {
 			FileConfiguration config = plugin.getConfig();
 
 			if (args.length == 0) {
-				sender.sendMessage(SnowBallBattle.messagePrefix
+				sender.sendMessage(FrozenFight.messagePrefix
 						+ "パラメータが足りません。");
 				return false;
 			}
@@ -193,29 +193,29 @@ public class SnowCommandExecutor implements CommandExecutor {
 
 			if (args[0].equals("getmeta")) {
 				if (args[1] == null || args.length != 3) {
-					sender.sendMessage(SnowBallBattle.messagePrefix
+					sender.sendMessage(FrozenFight.messagePrefix
 							+ "パラメータエラー");
 					return false;
 				}
 				if (args[1].equals("world")) {
 					World world = Bukkit.getServer().getWorlds().get(0);
 					if (args[2] == null) {
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ "チーム名が与えられていません。");
 						return false;
 					}
 					if (!config.getStringList("Team.Names").contains(args[2])
 							&& !args[2].equals("lobby")) {
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ "チームが存在しません。もう一度確認して下さい。");
 						return true;
 					}
 					if (!world.hasMetadata(args[2] + "set")) {
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ "データがありません。");
 						return true;
 					}
-					sender.sendMessage(SnowBallBattle.messagePrefix + args[2]
+					sender.sendMessage(FrozenFight.messagePrefix + args[2]
 							+ "のリスポーンポイントは");
 					sender.sendMessage("x = "
 							+ world.getMetadata(args[2] + "Resx").get(0)
@@ -230,18 +230,18 @@ public class SnowCommandExecutor implements CommandExecutor {
 				} else if (args[1].equals("player")) {
 					if (world.hasMetadata("ingame")) {
 						if (args[2] == null) {
-							sender.sendMessage(SnowBallBattle.messagePrefix
+							sender.sendMessage(FrozenFight.messagePrefix
 									+ "プレイヤー名が与えられていません。");
 							return false;
 						}
 						if (!Arrays.asList(players).contains(
 								Bukkit.getPlayer(args[2]))) {
-							sender.sendMessage(SnowBallBattle.messagePrefix
+							sender.sendMessage(FrozenFight.messagePrefix
 									+ "プレイヤーは存在しません。");
 							return true;
 						}
 						Player obj = Bukkit.getPlayer(args[2]);
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ args[2] + " team:"
 								+ obj.getMetadata("teamName").get(0).asString());
 						return true;
@@ -254,7 +254,7 @@ public class SnowCommandExecutor implements CommandExecutor {
 			// help
 
 			else if (args[0].equals("help")) {
-				sender.sendMessage(SnowBallBattle.messagePrefix
+				sender.sendMessage(FrozenFight.messagePrefix
 						+ "SnowBallBattle ヘルプ\n" + "/lobby - ロビーへのワープ\n"
 						+ "/sbb getmeta - メタデータを取得\n" + "/sbb help - ヘルプを表示\n"
 						+ "/sbb item list - アイテム一覧を表示\n"
@@ -279,7 +279,7 @@ public class SnowCommandExecutor implements CommandExecutor {
 			else if (args[0].equals("item")) {
 
 				if (world.hasMetadata("ingame") || world.hasMetadata("ready")) {
-					sender.sendMessage(SnowBallBattle.messagePrefix
+					sender.sendMessage(FrozenFight.messagePrefix
 							+ "ゲーム中はこのコマンドは実行できません");
 					return true;
 				}
@@ -288,14 +288,14 @@ public class SnowCommandExecutor implements CommandExecutor {
 
 				else if (args[1].equals("toggle")) {
 					if (args[2] == null || args.length != 3) {
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ "パラメータエラー");
 						return false;
 					}
 					try {
-						SnowItem.valueOf(args[2]);
+						FFItem.valueOf(args[2]);
 					} catch (Exception e) {
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ "アイテムが存在しません。もう一度確認して下さい。");
 						return true;
 					}
@@ -303,7 +303,7 @@ public class SnowCommandExecutor implements CommandExecutor {
 					boolean bool = !config.getBoolean("Item." + args[2]
 							+ ".Active");
 					config.set("Item." + args[2] + ".Active", bool);
-					sender.sendMessage(SnowBallBattle.messagePrefix + args[2]
+					sender.sendMessage(FrozenFight.messagePrefix + args[2]
 							+ " toggled to " + bool);
 					plugin.saveConfig();
 				}
@@ -312,27 +312,27 @@ public class SnowCommandExecutor implements CommandExecutor {
 
 				else if (args[1].equals("add")) {
 					if (args.length != 4) {
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ "パラメータエラー");
 						return false;
 					}
 					if (args[2] == null || args[3] == null) {
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ "パラメータエラー");
 						return false;
 					}
 					if (sender instanceof Player) {
 						final Player player = (Player) sender;
 						if (!player.hasMetadata("Location")) {
-							player.sendMessage(SnowBallBattle.messagePrefix
+							player.sendMessage(FrozenFight.messagePrefix
 									+ "範囲がスロットに記録されていません。");
 							return true;
 						}
 
 						try {
-							SnowItem.valueOf(args[2]);
+							FFItem.valueOf(args[2]);
 						} catch (Exception e) {
-							player.sendMessage(SnowBallBattle.messagePrefix
+							player.sendMessage(FrozenFight.messagePrefix
 									+ "アイテムが存在しません。もう一度確認して下さい。");
 							return true;
 						}
@@ -369,16 +369,16 @@ public class SnowCommandExecutor implements CommandExecutor {
 						config.set("Item." + itemName + ".num" + itemNum
 								+ ".Spawn", new Vector(locx, itemlocy, locz));
 						plugin.saveConfig();
-						player.sendMessage(SnowBallBattle.messagePrefix
+						player.sendMessage(FrozenFight.messagePrefix
 								+ itemName + "のスポーン地点を追加しました。");
-						player.sendMessage(SnowBallBattle.messagePrefix
+						player.sendMessage(FrozenFight.messagePrefix
 								+ "time :" + spawnTime);
-						player.sendMessage(SnowBallBattle.messagePrefix
+						player.sendMessage(FrozenFight.messagePrefix
 								+ "location : " + "X:" + locx + " Y:"
 								+ itemlocy + " Z:" + locz);
 						return true;
 					} else {
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ ChatColor.RED + "コマンドを実行したプレイヤー("
 								+ sender.getName() + ")を特定できませんでした。");
 						return false;
@@ -389,21 +389,21 @@ public class SnowCommandExecutor implements CommandExecutor {
 
 				else if (args[1].equals("dur")) {
 					if (args.length != 4) {
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ "パラメータエラー");
 						return false;
 					}
 					if (args[2] == null || args[3] == null) {
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ "パラメータエラー");
 						return false;
 					}
 					if (sender instanceof Player) {
 						final Player player = (Player) sender;
 						try {
-							SnowItem.valueOf(args[2]);
+							FFItem.valueOf(args[2]);
 						} catch (Exception e) {
-							player.sendMessage(SnowBallBattle.messagePrefix
+							player.sendMessage(FrozenFight.messagePrefix
 									+ "アイテムが存在しません。もう一度確認して下さい。");
 							return true;
 						}
@@ -424,12 +424,12 @@ public class SnowCommandExecutor implements CommandExecutor {
 						}
 						config.set("Item." + itemName + ".Duration", duration);
 						plugin.saveConfig();
-						player.sendMessage(SnowBallBattle.messagePrefix
+						player.sendMessage(FrozenFight.messagePrefix
 								+ itemName + "の効果時間を" + duration + "にしました。");
 
 						return true;
 					} else {
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ ChatColor.RED + "コマンドを実行したプレイヤー("
 								+ sender.getName() + ")を特定できませんでした。");
 						return false;
@@ -440,7 +440,7 @@ public class SnowCommandExecutor implements CommandExecutor {
 
 				else if (args[1].equals("type")) {
 					if (args[2] == null || args.length != 3) {
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ "パラメータエラー");
 						return false;
 					}
@@ -448,9 +448,9 @@ public class SnowCommandExecutor implements CommandExecutor {
 
 						Player player = (Player) sender;
 						try {
-							SnowItem.valueOf(args[2]);
+							FFItem.valueOf(args[2]);
 						} catch (Exception e) {
-							player.sendMessage(SnowBallBattle.messagePrefix
+							player.sendMessage(FrozenFight.messagePrefix
 									+ "アイテムが存在しません。もう一度確認して下さい。");
 							return true;
 						}
@@ -458,7 +458,7 @@ public class SnowCommandExecutor implements CommandExecutor {
 						Material itemInHand = player.getItemInHand().getType();
 
 						if (itemInHand.equals(Material.AIR)) {
-							player.sendMessage(SnowBallBattle.messagePrefix
+							player.sendMessage(FrozenFight.messagePrefix
 									+ "手にアイテムがありません。");
 							return true;
 						}
@@ -466,12 +466,12 @@ public class SnowCommandExecutor implements CommandExecutor {
 						config.set("Item." + args[2] + ".Item", new ItemStack(
 								itemInHand));
 						plugin.saveConfig();
-						player.sendMessage(SnowBallBattle.messagePrefix
+						player.sendMessage(FrozenFight.messagePrefix
 								+ args[2] + "のアイテムタイプを" + itemInHand.toString()
 								+ "にしました");
 
 					} else {
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ ChatColor.RED + "コマンドを実行したプレイヤー("
 								+ sender.getName() + ")を特定できませんでした。");
 						return false;
@@ -483,7 +483,7 @@ public class SnowCommandExecutor implements CommandExecutor {
 
 				else if (args[1].equals("rem")) {
 					if (args[2] == null || args.length != 3) {
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ "パラメータエラー");
 						return false;
 					}
@@ -492,9 +492,9 @@ public class SnowCommandExecutor implements CommandExecutor {
 						Location playerLocation = player.getLocation();
 
 						try {
-							SnowItem.valueOf(args[2]);
+							FFItem.valueOf(args[2]);
 						} catch (Exception e) {
-							player.sendMessage(SnowBallBattle.messagePrefix
+							player.sendMessage(FrozenFight.messagePrefix
 									+ "アイテムが存在しません。もう一度確認して下さい。");
 							return true;
 						}
@@ -507,7 +507,7 @@ public class SnowCommandExecutor implements CommandExecutor {
 								+ ".Numbers");
 
 						if (itemNum <= 0) {
-							player.sendMessage(SnowBallBattle.messagePrefix
+							player.sendMessage(FrozenFight.messagePrefix
 									+ "no locations registered");
 							return true;
 						}
@@ -557,7 +557,7 @@ public class SnowCommandExecutor implements CommandExecutor {
 
 						config.set("Item." + itemName + ".Numbers", itemNum - 1);
 
-						player.sendMessage(SnowBallBattle.messagePrefix + "X:"
+						player.sendMessage(FrozenFight.messagePrefix + "X:"
 								+ nearest.getX() + " Y:" + nearest.getY()
 								+ " Z:" + nearest.getZ() + " の" + itemName
 								+ "を削除しました");
@@ -567,7 +567,7 @@ public class SnowCommandExecutor implements CommandExecutor {
 						return true;
 
 					} else {
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ ChatColor.RED + "コマンドを実行したプレイヤー("
 								+ sender.getName() + ")を特定できませんでした。");
 						return false;
@@ -576,17 +576,17 @@ public class SnowCommandExecutor implements CommandExecutor {
 
 				else if (args[1].equals("list")) {
 					if (args.length != 2) {
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ "パラメータエラー");
 						return false;
 					}
 
-					SnowItem[] si = SnowItem.values();
-					for (SnowItem snowItem : si) {
+					FFItem[] si = FFItem.values();
+					for (FFItem snowItem : si) {
 						String itemName = snowItem.name();
 						Boolean itemActive = config.getBoolean("Item."
 								+ itemName + ".Active");
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ itemName + "  active:" + itemActive);
 						int itemNum = config.getInt("Item." + itemName
 								+ ".Numbers");
@@ -598,7 +598,7 @@ public class SnowCommandExecutor implements CommandExecutor {
 											+ ".SpawnTime");
 							int spawnTime = config.getInt("Item." + itemName
 									+ ".num" + j + ".SpawnTime");
-							sender.sendMessage(SnowBallBattle.messagePrefix + j
+							sender.sendMessage(FrozenFight.messagePrefix + j
 									+ "  X:" + vector.getX() + " Y:"
 									+ vector.getY() + " Z:" + vector.getZ()
 									+ " , spawns at " + spawnTime + "min");
@@ -626,20 +626,20 @@ public class SnowCommandExecutor implements CommandExecutor {
 
 			else if (args[0].equals("set")) {
 				if (world.hasMetadata("ingame") || world.hasMetadata("ready")) {
-					sender.sendMessage(SnowBallBattle.messagePrefix
+					sender.sendMessage(FrozenFight.messagePrefix
 							+ "ゲーム中はこのコマンドは実行できません");
 					return true;
 				}
 
 				if (sender instanceof Player) {
 					if (args[1] == null) {
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ "パラメータエラー");
 						return false;
 					}
 					final Player player = (Player) sender;
 					if (!player.hasMetadata("Location")) {
-						player.sendMessage(SnowBallBattle.messagePrefix
+						player.sendMessage(FrozenFight.messagePrefix
 								+ "範囲がスロットに記録されていません。");
 						return true;
 					}
@@ -657,7 +657,7 @@ public class SnowCommandExecutor implements CommandExecutor {
 
 					if (args[1].equals("lobby")) {
 						if (args.length != 2) {
-							player.sendMessage(SnowBallBattle.messagePrefix
+							player.sendMessage(FrozenFight.messagePrefix
 									+ "パラメータエラー");
 							return false;
 						}
@@ -674,7 +674,7 @@ public class SnowCommandExecutor implements CommandExecutor {
 						config.set("lobby", new Vector(locx, locy, locz));
 						config.set("lobbyyaw", locyaw1);
 						plugin.saveConfig();
-						player.sendMessage(SnowBallBattle.messagePrefix
+						player.sendMessage(FrozenFight.messagePrefix
 								+ "ロビーのリスポーン地点を\nX:" + locx + "\nY:" + locy
 								+ "\nZ:" + locz + "に設定しました。");
 						return true;
@@ -684,13 +684,13 @@ public class SnowCommandExecutor implements CommandExecutor {
 
 					else if (args[1].equals("spawn")) {
 						if (args.length != 3) {
-							player.sendMessage(SnowBallBattle.messagePrefix
+							player.sendMessage(FrozenFight.messagePrefix
 									+ "パラメータエラー");
 							return false;
 						}
 						if (!config.getStringList("Team.Names").contains(
 								args[2])) {
-							player.sendMessage(SnowBallBattle.messagePrefix
+							player.sendMessage(FrozenFight.messagePrefix
 									+ "チームが存在しません。もう一度確認して下さい。");
 							return true;
 						}
@@ -708,14 +708,14 @@ public class SnowCommandExecutor implements CommandExecutor {
 								locz));
 						config.set(args[2] + ".RespawnYaw", locyaw1);
 						plugin.saveConfig();
-						player.sendMessage(SnowBallBattle.messagePrefix
+						player.sendMessage(FrozenFight.messagePrefix
 								+ args[2] + "のリスポーン地点を\nX:" + locx + "\nY:"
 								+ locy + "\nZ:" + locz + "に設定しました。");
 						return true;
 					}
 
 				} else {
-					sender.sendMessage(SnowBallBattle.messagePrefix
+					sender.sendMessage(FrozenFight.messagePrefix
 							+ ChatColor.RED + "コマンドを実行したプレイヤー("
 							+ sender.getName() + ")を特定できませんでした。");
 					return false;
@@ -727,30 +727,30 @@ public class SnowCommandExecutor implements CommandExecutor {
 			else if (args[0].equals("ready")) {
 				if (config.getString("Mode").equals("premade")) {
 					if (TeamsWithoutPlayers()) {
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ "teams need members!");
 						return true;
 					}
 					if (MissingMembers()) {
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ "missing member or wrong name!");
 						return true;
 					}
 				}
 
 				if (world.hasMetadata("ingame") || world.hasMetadata("ready")) {
-					sender.sendMessage(SnowBallBattle.messagePrefix
+					sender.sendMessage(FrozenFight.messagePrefix
 							+ "ゲーム中はこのコマンドは実行できません");
 					return true;
 				}
 				if (config.getStringList("Team.Names").size() < 2) {
-					sender.sendMessage(SnowBallBattle.messagePrefix
+					sender.sendMessage(FrozenFight.messagePrefix
 							+ "チーム数が少なすぎます。");
 					return true;
 				}
 				World world = Bukkit.getServer().getWorlds().get(0);
 				if (!world.hasMetadata("lobbyset")) {
-					sender.sendMessage(SnowBallBattle.messagePrefix
+					sender.sendMessage(FrozenFight.messagePrefix
 							+ "ロビーが設定されていません。");
 					return true;
 				}
@@ -758,8 +758,8 @@ public class SnowCommandExecutor implements CommandExecutor {
 					if (world.hasMetadata(teamName + "Set")) {
 						continue;
 					} else {
-						Team team = SnowBallBattle.board.getTeam(teamName);
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						Team team = FrozenFight.board.getTeam(teamName);
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ team.getPrefix() + team.getName()
 								+ team.getSuffix() + "のリスポーンポイントが設定されていません。");
 						return true;
@@ -769,13 +769,13 @@ public class SnowCommandExecutor implements CommandExecutor {
 					if (world.hasMetadata(itemName + "Set")) {
 						continue;
 					} else {
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ itemName + "のスポーンポイントが設定されていません。");
 						return true;
 					}
 				}
-				new SnowScoreboard(plugin).removePlayers();
-				PlayerJoinTeam pjt = new PlayerJoinTeam(plugin);
+				new FFScoreboard(plugin).removePlayers();
+				FFJoinTeam pjt = new FFJoinTeam(plugin);
 				if (config.getString("Mode").equals("premade")) {
 
 					// premade
@@ -845,24 +845,24 @@ public class SnowCommandExecutor implements CommandExecutor {
 
 				// SnowBallBattle.board.getObjective("Tscore").setDisplayName(
 				// "Time  " + gamemin + ":" + gamesecString);
-				SnowBallBattle.board.getObjective("Tscore").setDisplayName(
+				FrozenFight.board.getObjective("Tscore").setDisplayName(
 						"チームスコア");
-				new SnowScoreboard(plugin).showScore();
+				new FFScoreboard(plugin).showScore();
 				plugin.getLogger().info("ゲーム開始コマンドが実行されました。");
 				plugin.getServer().broadcastMessage(
-						SnowBallBattle.messagePrefix + "もうすぐゲームが始まります。");
+						FrozenFight.messagePrefix + "もうすぐゲームが始まります。");
 				for (Player player : players) {
 					BarAPI.setMessage(player, "残り時間  " + gamemin + ":"
 							+ gamesecString);
 				}
 				new SnowCountdown().runTaskTimer(plugin, 0, 20);
-				gameStart = new SnowRunnableStart(this.plugin).runTaskLater(
+				gameStart = new FFRunnableStart(this.plugin).runTaskLater(
 						this.plugin, 20 * count);
-				spawnItem = new SpawnItems(plugin).runTaskLater(plugin,
+				spawnItem = new FFSpawnItems(plugin).runTaskLater(plugin,
 						20 * count);
 				gameTimeCount = new GameCountdown().runTaskTimer(plugin,
 						20 * count, 20);
-				gameEnd = new SnowRunnableFinish(this.plugin).runTaskLater(
+				gameEnd = new FFRunnableFinish(this.plugin).runTaskLater(
 						this.plugin,
 						20 * (count + 60 * config.getInt("Game.GameTime")));
 				return true;
@@ -871,62 +871,62 @@ public class SnowCommandExecutor implements CommandExecutor {
 			// rule
 			else if (args[0].equals("spect")) {
 				if (world.hasMetadata("ingame") || world.hasMetadata("ready")) {
-					sender.sendMessage(SnowBallBattle.messagePrefix
+					sender.sendMessage(FrozenFight.messagePrefix
 							+ "ゲーム中はこのコマンドは実行できません");
 					return true;
 				}
 				if (args[1].equals(null)) {
-					sender.sendMessage(SnowBallBattle.messagePrefix
+					sender.sendMessage(FrozenFight.messagePrefix
 							+ "パラメータエラー");
 					return false;
 				} else if (args[1].equals("add")) {
 					if (args[2].equals(null)) {
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ "プレイヤー名が入力されていません。");
 						return false;
 					}
 					if (!Arrays.asList(players).contains(
 							Bukkit.getPlayer(args[2]))) {
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ "プレイヤーは存在しません。");
 						return true;
 					}
 					if (spec.addSpectator(args[2])) {
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ args[2] + "をspectatorに追加しました。");
 					} else {
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ args[2] + "はすでにspectatorです。");
 					}
 					return true;
 				} else if (args[1].equals("remove")) {
 					if (args[2].equals(null)) {
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ "プレイヤー名が入力されていません。");
 						return false;
 					}
 					if (!Arrays.asList(players).contains(
 							Bukkit.getPlayer(args[2]))) {
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ "プレイヤーは存在しません。");
 						return true;
 					}
 					if (spec.removeSpectator(args[2])) {
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ args[2] + "をspectatorから削除しました。");
 					} else {
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ args[2] + "をspectatorから削除できませんでした。");
 					}
 					return true;
 				} else if (args[1].equals("height")) {
 					if (args[2].equals(null)) {
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ "パラメータエラー");
 						return false;
 					} else {
 						if (!isInteger(args[1])) {
-							sender.sendMessage(SnowBallBattle.messagePrefix
+							sender.sendMessage(FrozenFight.messagePrefix
 									+ args[1] + "は整数にしてください。");
 							return true;
 						} else {
@@ -954,7 +954,7 @@ public class SnowCommandExecutor implements CommandExecutor {
 					for (Player player : Bukkit.getOnlinePlayers()) {
 						player.setExp(0);
 					}
-					gameEnd = new SnowRunnableFinish(this.plugin)
+					gameEnd = new FFRunnableFinish(this.plugin)
 							.runTask(plugin);
 				}
 			}
@@ -963,17 +963,17 @@ public class SnowCommandExecutor implements CommandExecutor {
 
 			else if (args[0].equals("maxplayers")) {
 				if (world.hasMetadata("ingame") || world.hasMetadata("ready")) {
-					sender.sendMessage(SnowBallBattle.messagePrefix
+					sender.sendMessage(FrozenFight.messagePrefix
 							+ "ゲーム中はこのコマンドは実行できません");
 					return true;
 				}
 				if (args[1].equals(null)) {
-					sender.sendMessage(SnowBallBattle.messagePrefix
+					sender.sendMessage(FrozenFight.messagePrefix
 							+ "パラメータエラー");
 					return false;
 				} else {
 					if (!isInteger(args[1])) {
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ args[1] + "は整数にしてください。");
 						return true;
 					} else {
@@ -984,25 +984,25 @@ public class SnowCommandExecutor implements CommandExecutor {
 				}
 			} else if (args[0].equals("teams")) {
 				if (world.hasMetadata("ingame") || world.hasMetadata("ready")) {
-					sender.sendMessage(SnowBallBattle.messagePrefix
+					sender.sendMessage(FrozenFight.messagePrefix
 							+ "ゲーム中はこのコマンドは実行できません");
 					return true;
 				}
 				if (args[1] == null) {
-					sender.sendMessage(SnowBallBattle.messagePrefix
+					sender.sendMessage(FrozenFight.messagePrefix
 							+ "パラメーターエラー");
 					return false;
 				}
 				if (args[1].equals("add")) {
 
 					if (args[2] == null || args[3] == null || args[4] == null) {
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ "パラメータエラー");
 						return false;
 					}
 
 					if (config.getStringList("Team.Names").contains(args[2])) {
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ "既に存在しているチーム名です。");
 						return true;
 					}
@@ -1012,7 +1012,7 @@ public class SnowCommandExecutor implements CommandExecutor {
 					for (String teamName : teamNames) {
 						if (config.getString(teamName + ".Color")
 								.equalsIgnoreCase(args[3])) {
-							sender.sendMessage(SnowBallBattle.messagePrefix
+							sender.sendMessage(FrozenFight.messagePrefix
 									+ "既に使われている色です。");
 							return true;
 						} else {
@@ -1023,7 +1023,7 @@ public class SnowCommandExecutor implements CommandExecutor {
 					for (String teamName : teamNames) {
 						if (config.getString(teamName + ".Armor")
 								.equalsIgnoreCase(args[4])) {
-							sender.sendMessage(SnowBallBattle.messagePrefix
+							sender.sendMessage(FrozenFight.messagePrefix
 									+ "既に使われている装備です。");
 							return true;
 						} else {
@@ -1033,19 +1033,19 @@ public class SnowCommandExecutor implements CommandExecutor {
 
 					ChatColor teamColor = getColor(args[3]);
 					if (teamColor == null) {
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ "利用可能な色ではありません。");
 						return true;
 					}
 
 					String armor = getArmor(args[4]);
 					if (armor == null) {
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ "利用可能な装備ではありません。");
 						return true;
 					}
 
-					Team team = SnowBallBattle.board.registerNewTeam(args[2]);
+					Team team = FrozenFight.board.registerNewTeam(args[2]);
 					team.setPrefix(teamColor.toString());
 					team.setSuffix(ChatColor.RESET.toString());
 					team.setAllowFriendlyFire(false);
@@ -1053,7 +1053,7 @@ public class SnowCommandExecutor implements CommandExecutor {
 							.getPrefix() + team.getName() + team.getSuffix());
 
 					team.addPlayer(teamPlayer);
-					SnowBallBattle.board.getObjective("Tscore")
+					FrozenFight.board.getObjective("Tscore")
 							.getScore(teamPlayer).setScore(0);
 
 					// configへ保存
@@ -1062,20 +1062,20 @@ public class SnowCommandExecutor implements CommandExecutor {
 					config.set(args[2] + ".Color", teamColor.toString());
 					config.set(args[2] + ".Armor", armor);
 					plugin.saveConfig();
-					sender.sendMessage(SnowBallBattle.messagePrefix + "チーム:"
+					sender.sendMessage(FrozenFight.messagePrefix + "チーム:"
 							+ team.getPrefix() + args[2] + team.getSuffix()
 							+ "を作成しました。");
-					sender.sendMessage(SnowBallBattle.messagePrefix
+					sender.sendMessage(FrozenFight.messagePrefix
 							+ "続けてリスポーン地点を設定してください。");
 					return true;
 				} else if (args[1].equals("remove")) {
 					if (args[2] == null) {
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ "パラメーターエラー。");
 						return false;
 					}
-					if (SnowBallBattle.board.getTeam(args[2]) != null) {
-						Team team = SnowBallBattle.board.getTeam(args[2]);
+					if (FrozenFight.board.getTeam(args[2]) != null) {
+						Team team = FrozenFight.board.getTeam(args[2]);
 						String teamName = team.getPrefix() + args[2]
 								+ team.getSuffix();
 						team.unregister();
@@ -1085,23 +1085,23 @@ public class SnowCommandExecutor implements CommandExecutor {
 						config.set("Team.Names", teamNames);
 						config.set("args[2]", null);
 						plugin.saveConfig();
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ "チーム:" + teamName + "を削除しました。");
 						return true;
 					} else {
-						sender.sendMessage(SnowBallBattle.messagePrefix
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ "チームが存在しません。");
 						return true;
 					}
 				} else if (args[1].equals("list")) {
-					for (Team team : SnowBallBattle.board.getTeams()) {
-						sender.sendMessage(SnowBallBattle.messagePrefix
+					for (Team team : FrozenFight.board.getTeams()) {
+						sender.sendMessage(FrozenFight.messagePrefix
 								+ team.getPrefix() + team.getName()
 								+ team.getSuffix());
 					}
 				}
 			} else {
-				sender.sendMessage(SnowBallBattle.messagePrefix
+				sender.sendMessage(FrozenFight.messagePrefix
 						+ "定義されていないコマンドです。");
 				return false;
 			}

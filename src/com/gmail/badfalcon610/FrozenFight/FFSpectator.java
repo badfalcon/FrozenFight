@@ -1,4 +1,4 @@
-package com.github.badfalcon.SnowBallBattle;
+package com.gmail.badfalcon610.FrozenFight;
 
 import java.util.List;
 
@@ -7,11 +7,11 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
 
-public class Spectator {
+public class FFSpectator {
 
-	SnowBallBattle plugin;
+	FrozenFight plugin;
 
-	public Spectator(SnowBallBattle plugin) {
+	public FFSpectator(FrozenFight plugin) {
 		this.plugin = plugin;
 	}
 
