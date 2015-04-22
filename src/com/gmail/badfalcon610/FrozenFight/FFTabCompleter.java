@@ -53,9 +53,9 @@ public class FFTabCompleter implements TabCompleter {
 			String alias, String[] args) {
 		tab = new ArrayList<String>();
 
-		// sbb
+		// ff
 
-		if (command.getName().equalsIgnoreCase("sbb")) {
+		if (command.getName().equalsIgnoreCase("ff")) {
 			if (args.length == 0 || args[0].length() == 0) {
 				tab = Arrays.asList("getmeta", "item", "ready", "set", "spect",
 						"stop", "teams");
@@ -201,10 +201,20 @@ public class FFTabCompleter implements TabCompleter {
 							if (args.length == 2) {
 								return tab;
 							}
+							List<String> teams = getTeams();
 							if (args[2].length() == 0) {
 								// teamlist
-								List<String> teams = getTeams();
 								tab = new ArrayList<String>(teams);
+							} else {
+								for (String teamName : teams) {
+									if (teamName.startsWith(args[2])) {
+										if (args[2].equalsIgnoreCase(teamName)) {
+											return tab;
+										} else {
+											tab.addAll(Arrays.asList(teamName));
+										}
+									}
+								}
 							}
 						} else {
 							tab.addAll(Arrays.asList("spawn"));
@@ -359,7 +369,7 @@ public class FFTabCompleter implements TabCompleter {
 			return tab;
 
 		} else {
-			tab.addAll(Arrays.asList("sbb"));
+			tab.addAll(Arrays.asList("ff"));
 			return tab;
 		}
 		// TODO 自動生成されたメソッド・スタブ

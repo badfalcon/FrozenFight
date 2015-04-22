@@ -12,7 +12,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -20,11 +19,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.Team;
 import org.bukkit.util.Vector;
@@ -54,93 +51,6 @@ public class FFCommandExecutor implements CommandExecutor {
 		}
 	}
 
-	class GameCountdown extends BukkitRunnable {
-		private int maxtime;
-		private int gametime;
-
-		public GameCountdown() {
-			maxtime = plugin.getConfig().getInt("Game.GameTime") * 60;
-			gametime = plugin.getConfig().getInt("Game.GameTime") * 60;
-		}
-
-		public void run() {
-			int gamemin = gametime / 60;
-			int gamesec = gametime % 60;
-
-			String gamesecString;
-			if (gamesec < 10) {
-				gamesecString = "0" + String.valueOf(gamesec);
-			} else {
-				gamesecString = String.valueOf(gamesec);
-			}
-
-			for (Player player : Bukkit.getOnlinePlayers()) {
-
-				BarAPI.setMessage(player, "残り時間  " + gamemin + ":"
-						+ gamesecString);
-				BarAPI.setHealth(player, (float) gametime / (float) maxtime
-						* 100F);
-				int maxFillTime = plugin.getConfig().getInt(
-						"Game.GiveSnowBallTime");
-				float current = player.getExp();
-				if (current - (float) (1.0f / maxFillTime) <= 0.0f) {
-
-					if (gametime != maxtime && gametime != 0) {
-						int SnowNum = plugin.getConfig().getInt(
-								"Game.GiveSnowBallNum");
-						if (!FFSpectator.isSpectating(player)) {
-							PlayerInventory inventory = player.getInventory();
-							inventory.addItem(new ItemStack(Material.SNOW_BALL,
-									SnowNum));
-
-						}
-					}
-					player.setExp(1.0f);
-				} else {
-					player.setExp(current - (float) (1.0f / maxFillTime));
-				}
-			}
-			if (gametime > 0) {
-				gametime--;
-			} else {
-				for (Player player : Bukkit.getOnlinePlayers()) {
-					BarAPI.removeBar(player);
-				}
-				cancel();
-			}
-		}
-	}
-
-	class SnowCountdown extends BukkitRunnable {
-
-		private int countdown = count;
-
-		public void run() {
-
-			if (countdown < 10) {
-				Player[] players = Bukkit.getOnlinePlayers();
-				if (countdown <= 3) {
-					for (Player player : players) {
-						player.playSound(player.getLocation(), Sound.CLICK, 1,
-								1);
-					}
-				}
-				for (Player player : players) {
-					player.sendMessage(FrozenFight.messagePrefix
-							+ "ゲーム開始まで " + countdown);
-				}
-			} else {
-				Bukkit.getServer().broadcastMessage(
-						FrozenFight.messagePrefix + "ゲーム開始まで" + countdown);
-			}
-
-			if (countdown > 1) {
-				countdown--;
-			} else {
-				cancel();
-			}
-		}
-	}
 
 	boolean sendToLobby(CommandSender sender) {
 		if (sender instanceof Player) {
@@ -183,8 +93,7 @@ public class FFCommandExecutor implements CommandExecutor {
 			FileConfiguration config = plugin.getConfig();
 
 			if (args.length == 0) {
-				sender.sendMessage(FrozenFight.messagePrefix
-						+ "パラメータが足りません。");
+				sender.sendMessage(FrozenFight.messagePrefix + "パラメータが足りません。");
 				return false;
 			}
 			Player[] players = plugin.getServer().getOnlinePlayers();
@@ -193,8 +102,7 @@ public class FFCommandExecutor implements CommandExecutor {
 
 			if (args[0].equals("getmeta")) {
 				if (args[1] == null || args.length != 3) {
-					sender.sendMessage(FrozenFight.messagePrefix
-							+ "パラメータエラー");
+					sender.sendMessage(FrozenFight.messagePrefix + "パラメータエラー");
 					return false;
 				}
 				if (args[1].equals("world")) {
@@ -241,8 +149,8 @@ public class FFCommandExecutor implements CommandExecutor {
 							return true;
 						}
 						Player obj = Bukkit.getPlayer(args[2]);
-						sender.sendMessage(FrozenFight.messagePrefix
-								+ args[2] + " team:"
+						sender.sendMessage(FrozenFight.messagePrefix + args[2]
+								+ " team:"
 								+ obj.getMetadata("teamName").get(0).asString());
 						return true;
 					} else {
@@ -369,10 +277,10 @@ public class FFCommandExecutor implements CommandExecutor {
 						config.set("Item." + itemName + ".num" + itemNum
 								+ ".Spawn", new Vector(locx, itemlocy, locz));
 						plugin.saveConfig();
-						player.sendMessage(FrozenFight.messagePrefix
-								+ itemName + "のスポーン地点を追加しました。");
-						player.sendMessage(FrozenFight.messagePrefix
-								+ "time :" + spawnTime);
+						player.sendMessage(FrozenFight.messagePrefix + itemName
+								+ "のスポーン地点を追加しました。");
+						player.sendMessage(FrozenFight.messagePrefix + "time :"
+								+ spawnTime);
 						player.sendMessage(FrozenFight.messagePrefix
 								+ "location : " + "X:" + locx + " Y:"
 								+ itemlocy + " Z:" + locz);
@@ -424,8 +332,8 @@ public class FFCommandExecutor implements CommandExecutor {
 						}
 						config.set("Item." + itemName + ".Duration", duration);
 						plugin.saveConfig();
-						player.sendMessage(FrozenFight.messagePrefix
-								+ itemName + "の効果時間を" + duration + "にしました。");
+						player.sendMessage(FrozenFight.messagePrefix + itemName
+								+ "の効果時間を" + duration + "にしました。");
 
 						return true;
 					} else {
@@ -466,9 +374,8 @@ public class FFCommandExecutor implements CommandExecutor {
 						config.set("Item." + args[2] + ".Item", new ItemStack(
 								itemInHand));
 						plugin.saveConfig();
-						player.sendMessage(FrozenFight.messagePrefix
-								+ args[2] + "のアイテムタイプを" + itemInHand.toString()
-								+ "にしました");
+						player.sendMessage(FrozenFight.messagePrefix + args[2]
+								+ "のアイテムタイプを" + itemInHand.toString() + "にしました");
 
 					} else {
 						sender.sendMessage(FrozenFight.messagePrefix
@@ -586,8 +493,8 @@ public class FFCommandExecutor implements CommandExecutor {
 						String itemName = snowItem.name();
 						Boolean itemActive = config.getBoolean("Item."
 								+ itemName + ".Active");
-						sender.sendMessage(FrozenFight.messagePrefix
-								+ itemName + "  active:" + itemActive);
+						sender.sendMessage(FrozenFight.messagePrefix + itemName
+								+ "  active:" + itemActive);
 						int itemNum = config.getInt("Item." + itemName
 								+ ".Numbers");
 						for (int j = 1; j <= itemNum; j++) {
@@ -708,9 +615,9 @@ public class FFCommandExecutor implements CommandExecutor {
 								locz));
 						config.set(args[2] + ".RespawnYaw", locyaw1);
 						plugin.saveConfig();
-						player.sendMessage(FrozenFight.messagePrefix
-								+ args[2] + "のリスポーン地点を\nX:" + locx + "\nY:"
-								+ locy + "\nZ:" + locz + "に設定しました。");
+						player.sendMessage(FrozenFight.messagePrefix + args[2]
+								+ "のリスポーン地点を\nX:" + locx + "\nY:" + locy
+								+ "\nZ:" + locz + "に設定しました。");
 						return true;
 					}
 
@@ -769,13 +676,13 @@ public class FFCommandExecutor implements CommandExecutor {
 					if (world.hasMetadata(itemName + "Set")) {
 						continue;
 					} else {
-						sender.sendMessage(FrozenFight.messagePrefix
-								+ itemName + "のスポーンポイントが設定されていません。");
+						sender.sendMessage(FrozenFight.messagePrefix + itemName
+								+ "のスポーンポイントが設定されていません。");
 						return true;
 					}
 				}
 				new FFScoreboard(plugin).removePlayers();
-				FFJoinTeam pjt = new FFJoinTeam(plugin);
+				FFTeam pjt = new FFTeam(plugin);
 				if (config.getString("Mode").equals("premade")) {
 
 					// premade
@@ -805,20 +712,6 @@ public class FFCommandExecutor implements CommandExecutor {
 						// ↓途中参加者への例外処理が不完全
 						if (!spec.isSpectator(player.getName())) {
 
-							String team = player.getMetadata("TeamName").get(0)
-									.asString();
-							double spawnx = world.getMetadata(team + "Resx")
-									.get(0).asDouble();
-							double spawny = world.getMetadata(team + "Resy")
-									.get(0).asDouble();
-							double spawnz = world.getMetadata(team + "Resz")
-									.get(0).asDouble();
-							float spawnyaw = world.getMetadata(team + "Resyaw")
-									.get(0).asFloat();
-							Location respawn = new Location(world, spawnx,
-									spawny + 1, spawnz, spawnyaw, 0);
-							player.setBedSpawnLocation(respawn, true);
-							player.teleport(respawn);
 							player.setWalkSpeed(0.001F);
 							PotionEffect noJump = new PotionEffect(
 									PotionEffectType.JUMP, 200, -100, false);
@@ -855,13 +748,13 @@ public class FFCommandExecutor implements CommandExecutor {
 					BarAPI.setMessage(player, "残り時間  " + gamemin + ":"
 							+ gamesecString);
 				}
-				new SnowCountdown().runTaskTimer(plugin, 0, 20);
+				new FFGameStartCountdown(count).runTaskTimer(plugin, 0, 20);
 				gameStart = new FFRunnableStart(this.plugin).runTaskLater(
 						this.plugin, 20 * count);
 				spawnItem = new FFSpawnItems(plugin).runTaskLater(plugin,
 						20 * count);
-				gameTimeCount = new GameCountdown().runTaskTimer(plugin,
-						20 * count, 20);
+				gameTimeCount = new FFGameCountdown(plugin).runTaskTimer(
+						plugin, 20 * count, 20);
 				gameEnd = new FFRunnableFinish(this.plugin).runTaskLater(
 						this.plugin,
 						20 * (count + 60 * config.getInt("Game.GameTime")));
@@ -876,8 +769,7 @@ public class FFCommandExecutor implements CommandExecutor {
 					return true;
 				}
 				if (args[1].equals(null)) {
-					sender.sendMessage(FrozenFight.messagePrefix
-							+ "パラメータエラー");
+					sender.sendMessage(FrozenFight.messagePrefix + "パラメータエラー");
 					return false;
 				} else if (args[1].equals("add")) {
 					if (args[2].equals(null)) {
@@ -892,11 +784,11 @@ public class FFCommandExecutor implements CommandExecutor {
 						return true;
 					}
 					if (spec.addSpectator(args[2])) {
-						sender.sendMessage(FrozenFight.messagePrefix
-								+ args[2] + "をspectatorに追加しました。");
+						sender.sendMessage(FrozenFight.messagePrefix + args[2]
+								+ "をspectatorに追加しました。");
 					} else {
-						sender.sendMessage(FrozenFight.messagePrefix
-								+ args[2] + "はすでにspectatorです。");
+						sender.sendMessage(FrozenFight.messagePrefix + args[2]
+								+ "はすでにspectatorです。");
 					}
 					return true;
 				} else if (args[1].equals("remove")) {
@@ -912,11 +804,11 @@ public class FFCommandExecutor implements CommandExecutor {
 						return true;
 					}
 					if (spec.removeSpectator(args[2])) {
-						sender.sendMessage(FrozenFight.messagePrefix
-								+ args[2] + "をspectatorから削除しました。");
+						sender.sendMessage(FrozenFight.messagePrefix + args[2]
+								+ "をspectatorから削除しました。");
 					} else {
-						sender.sendMessage(FrozenFight.messagePrefix
-								+ args[2] + "をspectatorから削除できませんでした。");
+						sender.sendMessage(FrozenFight.messagePrefix + args[2]
+								+ "をspectatorから削除できませんでした。");
 					}
 					return true;
 				} else if (args[1].equals("height")) {
@@ -954,8 +846,7 @@ public class FFCommandExecutor implements CommandExecutor {
 					for (Player player : Bukkit.getOnlinePlayers()) {
 						player.setExp(0);
 					}
-					gameEnd = new FFRunnableFinish(this.plugin)
-							.runTask(plugin);
+					gameEnd = new FFRunnableFinish(this.plugin).runTask(plugin);
 				}
 			}
 
@@ -968,13 +859,12 @@ public class FFCommandExecutor implements CommandExecutor {
 					return true;
 				}
 				if (args[1].equals(null)) {
-					sender.sendMessage(FrozenFight.messagePrefix
-							+ "パラメータエラー");
+					sender.sendMessage(FrozenFight.messagePrefix + "パラメータエラー");
 					return false;
 				} else {
 					if (!isInteger(args[1])) {
-						sender.sendMessage(FrozenFight.messagePrefix
-								+ args[1] + "は整数にしてください。");
+						sender.sendMessage(FrozenFight.messagePrefix + args[1]
+								+ "は整数にしてください。");
 						return true;
 					} else {
 						config.set("Team.MaxPlayers", args[1]);
@@ -989,8 +879,7 @@ public class FFCommandExecutor implements CommandExecutor {
 					return true;
 				}
 				if (args[1] == null) {
-					sender.sendMessage(FrozenFight.messagePrefix
-							+ "パラメーターエラー");
+					sender.sendMessage(FrozenFight.messagePrefix + "パラメーターエラー");
 					return false;
 				}
 				if (args[1].equals("add")) {
@@ -1085,8 +974,8 @@ public class FFCommandExecutor implements CommandExecutor {
 						config.set("Team.Names", teamNames);
 						config.set("args[2]", null);
 						plugin.saveConfig();
-						sender.sendMessage(FrozenFight.messagePrefix
-								+ "チーム:" + teamName + "を削除しました。");
+						sender.sendMessage(FrozenFight.messagePrefix + "チーム:"
+								+ teamName + "を削除しました。");
 						return true;
 					} else {
 						sender.sendMessage(FrozenFight.messagePrefix

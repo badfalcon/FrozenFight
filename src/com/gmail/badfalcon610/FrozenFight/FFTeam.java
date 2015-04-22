@@ -4,16 +4,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
-public class FFJoinTeam {
+public class FFTeam {
 
 	FrozenFight plugin;
 
-	public FFJoinTeam(FrozenFight plugin) {
+	public FFTeam(FrozenFight plugin) {
 		this.plugin = plugin;
 	}
 
@@ -24,13 +27,11 @@ public class FFJoinTeam {
 		Team jointeam = board.getTeam(teamName);
 
 		jointeam.addPlayer(player);
-		player.setMetadata("TeamName",
-				new FixedMetadataValue(plugin, teamName));
+		player.setMetadata("TeamName", new FixedMetadataValue(plugin, teamName));
 		player.sendMessage(FrozenFight.messagePrefix + "あなたはチーム"
 				+ jointeam.getPrefix() + jointeam.getName().toString()
 				+ jointeam.getSuffix() + "へ参加しました。");
-		FrozenFight.board.getObjective("Pscore").getScore(player)
-				.setScore(0);
+		FrozenFight.board.getObjective("Pscore").getScore(player).setScore(0);
 	}
 
 	public void joinRandomTeam(Player player) {
@@ -60,19 +61,36 @@ public class FFJoinTeam {
 
 				if (jointeam.getSize() == leastTeam) {
 					jointeam.addPlayer(player);
+					String teamName = teamNames.get(teamnumber);
 					player.setMetadata("TeamName", new FixedMetadataValue(
-							plugin, teamNames.get(teamnumber)));
+							plugin, teamName));
 					player.sendMessage(FrozenFight.messagePrefix + "あなたはチーム"
 							+ jointeam.getPrefix()
 							+ jointeam.getName().toString()
 							+ jointeam.getSuffix() + "へ参加しました。");
-					FrozenFight.board.getObjective("Pscore")
-							.getScore(player).setScore(0);
+					FrozenFight.board.getObjective("Pscore").getScore(player)
+							.setScore(0);
+					World world = Bukkit.getWorlds().get(0);
+					double spawnx = world.getMetadata(teamName + "Resx").get(0)
+							.asDouble();
+					double spawny = world.getMetadata(teamName + "Resy").get(0)
+							.asDouble();
+					double spawnz = world.getMetadata(teamName + "Resz").get(0)
+							.asDouble();
+					float spawnyaw = world.getMetadata(teamName + "Resyaw")
+							.get(0).asFloat();
+					Location respawn = new Location(world, spawnx, spawny + 1,
+							spawnz, spawnyaw, 0);
+					player.setBedSpawnLocation(respawn, true);
 					break;
 				}
 			}
 		} else {
 			player.sendMessage(FrozenFight.messagePrefix + "あなたは観戦者です。");
 		}
+	}
+
+	public static void warpToTeamSpawn(Player player) {
+		player.teleport(player.getBedSpawnLocation());
 	}
 }

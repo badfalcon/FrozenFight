@@ -58,6 +58,8 @@ public class FFListener implements Listener {
 	FFScoreboard snowboard;
 	World world;
 
+	static FileConfiguration config;
+
 	public FFListener(FrozenFight plugin) {
 		this.plugin = plugin;
 		spec = new FFSpectator(this.plugin);
@@ -67,7 +69,7 @@ public class FFListener implements Listener {
 	@EventHandler
 	public void onPluginEnable(PluginEnableEvent event) {
 
-		FileConfiguration config = plugin.getConfig();
+		config = plugin.getConfig();
 
 		checkConfig(config);
 
@@ -205,18 +207,23 @@ public class FFListener implements Listener {
 
 				// チームに所属していない時
 
-				player.sendMessage(FrozenFight.messagePrefix
-						+ "現在のゲームが終了するまでお待ちください。");
-				player.setScoreboard(FrozenFight.board);
-				spec.setSpectate(player);
-				for (Player player1 : Bukkit.getOnlinePlayers()) {
-					if (!FFSpectator.isSpectating(player1)) {
+				if (plugin.getConfig().getString("Mode").equals("premade")) {
+					player.sendMessage(FrozenFight.messagePrefix
+							+ "現在のゲームが終了するまでお待ちください。");
+					player.setScoreboard(FrozenFight.board);
+					spec.setSpectate(player);
+					for (Player player1 : Bukkit.getOnlinePlayers()) {
+						if (!FFSpectator.isSpectating(player1)) {
 
-						// 観戦者を隠す
+							// 観戦者を隠す
 
-						player1.hidePlayer(player);
+							player1.hidePlayer(player);
+						}
 					}
+				} else {
+					new FFTeam(plugin).joinRandomTeam(player);
 				}
+
 			}
 
 		} else {
@@ -414,8 +421,7 @@ public class FFListener implements Listener {
 				p.setMetadata("Invisible", new FixedMetadataValue(plugin, true));
 
 				plugin.getServer().broadcastMessage(
-						FrozenFight.messagePrefix + p.getName()
-								+ "が透明になった!!");
+						FrozenFight.messagePrefix + p.getName() + "が透明になった!!");
 
 				// 削除タスク
 				int dur = plugin.getConfig().getInt("Item.Invisible.Duration");
@@ -434,8 +440,7 @@ public class FFListener implements Listener {
 				p.setMetadata("SpeedUp", new FixedMetadataValue(plugin, true));
 
 				plugin.getServer().broadcastMessage(
-						FrozenFight.messagePrefix + p.getName()
-								+ "の足が速くなった!!");
+						FrozenFight.messagePrefix + p.getName() + "の足が速くなった!!");
 
 				// 削除タスク
 				int dur = plugin.getConfig().getInt("Item.SpeedUp.Duration");
@@ -525,7 +530,8 @@ public class FFListener implements Listener {
 			}
 
 			if (nearestEntity != null) {
-				Bukkit.getLogger().info("target is " + nearestEntity.getName());
+				// Bukkit.getLogger().info("target is " +
+				// nearestEntity.getName());
 				cannon.setTarget(nearestEntity);
 				Location loca = cannon.getEyeLocation();
 				Location locb = nearestEntity.getEyeLocation();
@@ -827,22 +833,7 @@ public class FFListener implements Listener {
 
 						hitPlayer.setNoDamageTicks(plugin.getConfig().getInt(
 								"Game.InvincibleTime"));
-						double spawnx = world
-								.getMetadata(hitPlayerTeamName + "Resx").get(0)
-								.asDouble();
-						double spawny = world
-								.getMetadata(hitPlayerTeamName + "Resy").get(0)
-								.asDouble();
-						double spawnz = world
-								.getMetadata(hitPlayerTeamName + "Resz").get(0)
-								.asDouble();
-						float spawnyaw = world
-								.getMetadata(hitPlayerTeamName + "Resyaw")
-								.get(0).asFloat();
-						Location respawn = new Location(world, spawnx,
-								spawny + 1, spawnz, spawnyaw, 0);
-						hitPlayer.teleport(respawn);
-
+						FFTeam.warpToTeamSpawn(hitPlayer);
 						// アイテムリセット
 
 						ItemStack[] sb = new ItemStack[36];
@@ -861,8 +852,8 @@ public class FFListener implements Listener {
 
 						Team shooterTeam = FrozenFight.board
 								.getTeam(shooterTeamName);
-						Score personalScore = FrozenFight.board
-								.getObjective("Pscore").getScore(shooter);
+						Score personalScore = FrozenFight.board.getObjective(
+								"Pscore").getScore(shooter);
 						Score teamScore = FrozenFight.board.getObjective(
 								"Tscore").getScore(
 								Bukkit.getOfflinePlayer(shooterTeam.getPrefix()
@@ -875,8 +866,8 @@ public class FFListener implements Listener {
 								Sound.SUCCESSFUL_HIT, 1, 1);
 						shooter.giveExpLevels(1);
 						for (Player player : Bukkit.getOnlinePlayers()) {
-							player.sendMessage(FrozenFight.messagePrefix
-									+ "" + shooterTeam.getPrefix()
+							player.sendMessage(FrozenFight.messagePrefix + ""
+									+ shooterTeam.getPrefix()
 									+ shooterTeam.getName() + " + 1pt! "
 									+ ChatColor.RESET + " ("
 									+ shooter.getName() + " → "
