@@ -1,4 +1,4 @@
-name: SnowBallBattle
+name: FrozenFight
 main: com.github.badfalcon.FrozenFight.FrozenFight
 version: 0.9
 prefix: FF
