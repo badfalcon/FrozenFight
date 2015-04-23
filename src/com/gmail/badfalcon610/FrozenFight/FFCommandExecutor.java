@@ -88,7 +88,7 @@ public class FFCommandExecutor implements CommandExecutor {
 
 		// sbb
 
-		if (cmd.getName().equalsIgnoreCase("sbb")) {
+		if (cmd.getName().equalsIgnoreCase("ff")) {
 
 			FileConfiguration config = plugin.getConfig();
 

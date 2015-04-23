@@ -25,9 +25,9 @@ public class FrozenFight extends JavaPlugin {
 		new FFScoreboard(this).setScoreboard();
 		snowExecutor = new FFCommandExecutor(this);
 		snowCompleter = new FFTabCompleter(this);
-		getCommand("sbb").setExecutor(snowExecutor);
+		getCommand("ff").setExecutor(snowExecutor);
 		getCommand("lobby").setExecutor(snowExecutor);
-		getCommand("sbb").setTabCompleter(snowCompleter);
+		getCommand("ff").setTabCompleter(snowCompleter);
 
 		PluginManager pm = this.getServer().getPluginManager();
 		pm.registerEvents(new FFListener(this), this);

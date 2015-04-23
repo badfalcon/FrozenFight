@@ -1,9 +1,9 @@
 name: FrozenFight
-main: com.github.badfalcon.FrozenFight.FrozenFight
+main: com.gmail.badfalcon610.FrozenFight.FrozenFight
 version: 0.9
 prefix: FF
 commands:
-   sbb:
+   ff:
       description: ff
       usage: /ff
       permission: ff
@@ -14,7 +14,7 @@ commands:
       permission: lobby
       permission-message: You don't have permission.
 permissions:
-   sbb:
+   ff:
       description: sbb permission
       default: op
    lobby:

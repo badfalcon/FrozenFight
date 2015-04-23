@@ -204,10 +204,11 @@ public class FFListener implements Listener {
 				}
 
 			} else {
-
 				// チームに所属していない時
 
 				if (plugin.getConfig().getString("Mode").equals("premade")) {
+					//プリメイド
+
 					player.sendMessage(FrozenFight.messagePrefix
 							+ "現在のゲームが終了するまでお待ちください。");
 					player.setScoreboard(FrozenFight.board);
@@ -221,7 +222,10 @@ public class FFListener implements Listener {
 						}
 					}
 				} else {
+					//ランダムモード
+
 					new FFTeam(plugin).joinRandomTeam(player);
+					FFPlayer.Respawn(player, config);
 				}
 
 			}
@@ -607,32 +611,23 @@ public class FFListener implements Listener {
 
 	@EventHandler
 	public void onPlayerDropItem(PlayerDropItemEvent event) {
-
 		// プレイヤーがアイテムを落とした時
-
 		if (world.hasMetadata("ingame")) {
-
 			// ゲーム中の時
-
 			event.setCancelled(true);
 		}
 	}
 
 	@EventHandler
 	public void onWeatherChange(WeatherChangeEvent event) {
-
 		// 天候の変化時
-
 		event.setCancelled(true);
 	}
 
 	@EventHandler
 	public void onFoodLevelChange(FoodLevelChangeEvent event) {
-
 		// 空腹度の変化時
-
 		event.setFoodLevel(18);
-
 	}
 
 	@EventHandler
@@ -660,17 +655,14 @@ public class FFListener implements Listener {
 
 	@EventHandler
 	public void onPlayerMove(PlayerMoveEvent event) {
-
 		// プレイヤー移動時
 
 		Player player = event.getPlayer();
 
 		if (world.hasMetadata("ready")) {
-
 			// 準備中
 
 			if (!FFSpectator.isSpectating(player)) {
-
 				// 観戦者ではない時
 
 				String playerTeam = player.getMetadata("TeamName").get(0)
@@ -687,7 +679,6 @@ public class FFListener implements Listener {
 						spawnz, spawnyaw, 0);
 
 				if (event.getTo().getY() != respawn.getY()) {
-
 					// リスポーン地点のYじゃない時
 
 					player.teleport(respawn);
@@ -791,26 +782,17 @@ public class FFListener implements Listener {
 				if (livingentity.getType().equals(EntityType.SKELETON)) {
 
 					// スケルトンによる攻撃
-					Bukkit.getLogger().info("by skel");
-
 					shooter = Bukkit.getPlayer(livingentity
 							.getMetadata("owner").get(0).asString());
 
 				} else if (livingentity.getType().equals(EntityType.PLAYER)) {
 
 					// プレイヤーによる攻撃
-					Bukkit.getLogger().info("by player");
-
 					shooter = (Player) projectile.getShooter();
 				} else {
 
-					Bukkit.getLogger().info("by null");
-
 				}
 				Player hitPlayer = (Player) event.getEntity();
-
-				Bukkit.getLogger().info(
-						shooter.getName() + "→" + hitPlayer.getName());
 
 				if (!FFSpectator.isSpectating(hitPlayer)
 						&& hitPlayer.getNoDamageTicks() == 0) {
@@ -829,24 +811,8 @@ public class FFListener implements Listener {
 
 						event.setCancelled(true);
 
-						// 無敵にして、リスポーン
 
-						hitPlayer.setNoDamageTicks(plugin.getConfig().getInt(
-								"Game.InvincibleTime"));
-						FFTeam.warpToTeamSpawn(hitPlayer);
-						// アイテムリセット
-
-						ItemStack[] sb = new ItemStack[36];
-						for (int i = 0; i < plugin.getConfig().getInt(
-								"Game.SnowBallStacks"); i++) {
-							sb[i] = new ItemStack(Material.SNOW_BALL, 16);
-						}
-						hitPlayer.getInventory().clear();
-						hitPlayer.getInventory().setContents(sb);
-
-						// 経験値リセット
-
-						hitPlayer.setExp(1.0f);
+						FFPlayer.Respawn(hitPlayer, config);
 
 						// スコア追加
 
