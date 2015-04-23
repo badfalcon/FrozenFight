@@ -865,14 +865,13 @@ public class FFListener implements Listener {
 						shooter.playSound(shooter.getLocation(),
 								Sound.SUCCESSFUL_HIT, 1, 1);
 						shooter.giveExpLevels(1);
-						for (Player player : Bukkit.getOnlinePlayers()) {
-							player.sendMessage(FrozenFight.messagePrefix + ""
-									+ shooterTeam.getPrefix()
-									+ shooterTeam.getName() + " + 1pt! "
-									+ ChatColor.RESET + " ("
-									+ shooter.getName() + " → "
-									+ hitPlayer.getName() + ")");
-						}
+						String hitMessage = FrozenFight.messagePrefix + ""
+								+ shooterTeam.getPrefix()
+								+ shooterTeam.getName() + " + 1pt! "
+								+ ChatColor.RESET + " (" + shooter.getName()
+								+ " → " + hitPlayer.getName() + ")";
+						hitPlayer.sendMessage(hitMessage);
+						shooter.sendMessage(hitMessage);
 					} else {
 						event.setCancelled(true);
 					}
