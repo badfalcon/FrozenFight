@@ -289,9 +289,7 @@ public class FFTabCompleter implements TabCompleter {
 								return tab;
 							}
 							if (args[2].length() == 0) {
-
 								// チーム名なのでsuggestはなし
-
 							} else {
 								if (args.length == 3) {
 									return tab;

@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scoreboard.DisplaySlot;
 
 class FFGameCountdown extends BukkitRunnable {
 	private int maxtime;
@@ -35,20 +36,21 @@ class FFGameCountdown extends BukkitRunnable {
 			gamesecString = String.valueOf(gamesec);
 		}
 
+		if (gametime == 60) {
+			Bukkit.getServer().broadcastMessage(
+					FrozenFight.messagePrefix + "----終了1分前----");
+			FFScoreboard.hideScore(DisplaySlot.SIDEBAR);
+		}
+
 		Player[] onlinePlayers = Bukkit.getOnlinePlayers();
-
 		float currentExp = onlinePlayers[0].getExp();
-
 		for (Player player : onlinePlayers) {
 
 			BarAPI.setMessage(player, "残り時間  " + gamemin + ":" + gamesecString);
-
 			BarAPI.setHealth(player, (float) gametime / (float) maxtime * 100F);
 
 			if (currentExp - decreaseExp <= 0.0f) {
-
 				if (gametime != maxtime && gametime != 0) {
-
 					if (!FFSpectator.isSpectating(player)) {
 
 						PlayerInventory inventory = player.getInventory();

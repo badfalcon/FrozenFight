@@ -5,18 +5,34 @@ prefix: FF
 commands:
    ff:
       description: ff
-      usage: /ff
+      usage: /ff <subcommand>
       permission: ff
       permission-message: You don't have permission.
-   lobby:
+   l:
       description: lobby
-      usage: /lobby false
-      permission: lobby
+      usage: /l
+      permission: l
+      permission-message: You don't have permission.
+   all:
+      description: all chat
+      usage: /all <message>
+      permission: all
+      permission-message: You don't have permission.
+   r:
+      description: respawn
+      usage: /r
+      permission: r
       permission-message: You don't have permission.
 permissions:
    ff:
-      description: sbb permission
+      description: ff permission
       default: op
-   lobby:
+   l:
       description: lobby permission
+      default: true
+   r:
+      description: respawn permission
+      default: true
+   lobby:
+      description: allchat permission
       default: true

@@ -19,11 +19,11 @@ import org.bukkit.util.Vector;
 public class FFScoreboard {
 
 	FrozenFight plugin;
-	Scoreboard board;
+	static Scoreboard board;
 
 	public FFScoreboard(FrozenFight plugin) {
 		this.plugin = plugin;
-		this.board = FrozenFight.board;
+		board = FrozenFight.board;
 	}
 
 	World world = Bukkit.getWorlds().get(0);
@@ -112,7 +112,7 @@ public class FFScoreboard {
 		}
 	}
 
-	public void showScore() {
+	public static void showScore() {
 		Objective Pscore = board.getObjective("Pscore");
 		Objective Tscore = board.getObjective("Tscore");
 		Pscore.setDisplaySlot(DisplaySlot.BELOW_NAME);
@@ -120,10 +120,14 @@ public class FFScoreboard {
 		Tscore.setDisplaySlot(DisplaySlot.SIDEBAR);
 	}
 
-	public void hideScore() {
+	public static void hideScore() {
 		board.clearSlot(DisplaySlot.BELOW_NAME);
 		board.clearSlot(DisplaySlot.PLAYER_LIST);
 		board.clearSlot(DisplaySlot.SIDEBAR);
+	}
+
+	public static void hideScore(DisplaySlot slot) {
+		board.clearSlot(slot);
 	}
 
 	public void removePlayers() {

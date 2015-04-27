@@ -8,6 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -33,6 +34,7 @@ import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -207,7 +209,7 @@ public class FFListener implements Listener {
 				// チームに所属していない時
 
 				if (plugin.getConfig().getString("Mode").equals("premade")) {
-					//プリメイド
+					// プリメイド
 
 					player.sendMessage(FrozenFight.messagePrefix
 							+ "現在のゲームが終了するまでお待ちください。");
@@ -222,7 +224,7 @@ public class FFListener implements Listener {
 						}
 					}
 				} else {
-					//ランダムモード
+					// ランダムモード
 
 					new FFTeam(plugin).joinRandomTeam(player);
 					FFPlayer.Respawn(player, config);
@@ -243,6 +245,26 @@ public class FFListener implements Listener {
 			player.removeMetadata("spectator", plugin);
 
 		}
+	}
+
+	@EventHandler
+	public void onAsyncPlayerChat(AsyncPlayerChatEvent event) {
+		if (world.hasMetadata("ingame") || world.hasMetadata("ready")) {
+			Player p = event.getPlayer();
+			String message = event.getMessage();
+			event.setCancelled(true);
+
+			String teamName = p.getMetadata("TeamName").get(0).asString();
+			Team team = FrozenFight.board.getTeam(teamName);
+			for (OfflinePlayer offlinePlayer : team.getPlayers()) {
+				if (offlinePlayer.isOnline()) {
+					Player player = (Player) offlinePlayer;
+					player.sendMessage("[チームチャット] " + "<" + p.getName() + ">"
+							+ message);
+				}
+			}
+		}
+
 	}
 
 	@EventHandler
@@ -810,7 +832,6 @@ public class FFListener implements Listener {
 						//
 
 						event.setCancelled(true);
-
 
 						FFPlayer.Respawn(hitPlayer, config);
 
