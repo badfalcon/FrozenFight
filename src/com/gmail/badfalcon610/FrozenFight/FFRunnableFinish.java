@@ -39,13 +39,12 @@ public class FFRunnableFinish extends BukkitRunnable {
 			for (Player player1 : players) {
 				if (!player.canSee(player1)) {
 					player.showPlayer(player1);
-					player.getInventory().setArmorContents(clear);
-					player.getInventory().clear();
-					player.setLevel(0);
-					player.setExp(0);
-					player.removeMetadata("TeamName", plugin);
 				}
 			}
+			player.getInventory().setArmorContents(clear);
+			player.getInventory().clear();
+			player.setLevel(0);
+			player.setExp(0);
 			player.sendMessage(FrozenFight.messagePrefix + "ロビーへ転送します。");
 		}
 		World world = Bukkit.getWorlds().get(0);
@@ -63,9 +62,6 @@ public class FFRunnableFinish extends BukkitRunnable {
 
 		public void run() {
 			Player[] players = plugin.getServer().getOnlinePlayers();
-			FFScoreboard snowboard = new FFScoreboard(plugin);
-			FFScoreboard.hideScore();
-			snowboard.resetScore();
 			for (Player player : players) {
 				BarAPI.removeBar(player);
 				if (FFSpectator.isSpectating(player)) {

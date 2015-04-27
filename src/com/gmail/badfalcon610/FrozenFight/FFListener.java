@@ -244,6 +244,7 @@ public class FFListener implements Listener {
 			player.removeMetadata("teamcolor", plugin);
 			player.removeMetadata("spectator", plugin);
 
+			new FFLobby(plugin).warpLobby(player);
 		}
 	}
 
@@ -259,7 +260,8 @@ public class FFListener implements Listener {
 			for (OfflinePlayer offlinePlayer : team.getPlayers()) {
 				if (offlinePlayer.isOnline()) {
 					Player player = (Player) offlinePlayer;
-					player.sendMessage("[チームチャット] " + "<" + p.getName() + ">"
+					player.sendMessage("[チームチャット] " + "<" + team.getPrefix()
+							+ p.getDisplayName() + team.getSuffix() + "> "
 							+ message);
 				}
 			}
@@ -417,75 +419,89 @@ public class FFListener implements Listener {
 
 			// tripleshot
 
-			if (item.getItemStack().getItemMeta().getDisplayName()
-					.equals("TripleShot")) {
-				item.remove();
+			if (item.getItemStack().hasItemMeta()) {
+				if (item.getItemStack().getItemMeta().getDisplayName()
+						.equals("TripleShot")) {
+					item.remove();
+					event.setCancelled(true);
+					p.setMetadata("TripleShot", new FixedMetadataValue(plugin,
+							true));
+
+					plugin.getServer().broadcastMessage(
+							FrozenFight.messagePrefix + p.getName()
+									+ "の雪球が3ウェイになった!!");
+
+					// 削除タスク
+					int dur = plugin.getConfig().getInt(
+							"Item.TripleShot.Duration");
+					new DeleteBuff("TripleShot", p).runTaskLater(plugin,
+							20 * dur);
+
+				}
+
+				// invisible
+
+				else if (item.getItemStack().getItemMeta().getDisplayName()
+						.equals("Invisible")) {
+					item.remove();
+					event.setCancelled(true);
+					ItemStack[] armor = p.getInventory().getArmorContents();
+					p.getInventory().setArmorContents(new ItemStack[4]);
+					p.addPotionEffect(new PotionEffect(
+							PotionEffectType.INVISIBILITY, 200, 1));
+					p.setMetadata("Invisible", new FixedMetadataValue(plugin,
+							true));
+
+					plugin.getServer().broadcastMessage(
+							FrozenFight.messagePrefix + p.getName()
+									+ "が透明になった!!");
+
+					// 削除タスク
+					int dur = plugin.getConfig().getInt(
+							"Item.Invisible.Duration");
+					new DeleteBuff("Invisible", p).runTaskLater(plugin,
+							20 * dur);
+					new SetArmor(p, armor).runTaskLater(plugin, 20 * dur);
+				}
+
+				// speedup
+
+				else if (item.getItemStack().getItemMeta().getDisplayName()
+						.equals("SpeedUp")) {
+					item.remove();
+					event.setCancelled(true);
+					p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED,
+							200, 1));
+					p.setMetadata("SpeedUp", new FixedMetadataValue(plugin,
+							true));
+
+					plugin.getServer().broadcastMessage(
+							FrozenFight.messagePrefix + p.getName()
+									+ "の足が速くなった!!");
+
+					// 削除タスク
+					int dur = plugin.getConfig()
+							.getInt("Item.SpeedUp.Duration");
+					new DeleteBuff("SpeedUp", p).runTaskLater(plugin, 20 * dur);
+				}
+
+				// spawncannon
+
+				else if (item.getItemStack().getItemMeta().getDisplayName()
+						.equals("SpawnCannon")) {
+					item.remove();
+					event.setCancelled(true);
+					int dur = plugin.getConfig().getInt(
+							"Item.Invisible.Duration");
+					new SpawnCannon(p, dur / 2).runTaskTimer(plugin, 0, 40);
+
+					plugin.getServer().broadcastMessage(
+							FrozenFight.messagePrefix + p.getName()
+									+ "が雪だるまを召喚した!!");
+
+				}
+			} else {
 				event.setCancelled(true);
-				p.setMetadata("TripleShot",
-						new FixedMetadataValue(plugin, true));
-
-				plugin.getServer().broadcastMessage(
-						FrozenFight.messagePrefix + p.getName()
-								+ "の雪球が3ウェイになった!!");
-
-				// 削除タスク
-				int dur = plugin.getConfig().getInt("Item.TripleShot.Duration");
-				new DeleteBuff("TripleShot", p).runTaskLater(plugin, 20 * dur);
-
-			}
-
-			// invisible
-
-			else if (item.getItemStack().getItemMeta().getDisplayName()
-					.equals("Invisible")) {
-				item.remove();
-				event.setCancelled(true);
-				ItemStack[] armor = p.getInventory().getArmorContents();
-				p.getInventory().setArmorContents(new ItemStack[4]);
-				p.addPotionEffect(new PotionEffect(
-						PotionEffectType.INVISIBILITY, 200, 1));
-				p.setMetadata("Invisible", new FixedMetadataValue(plugin, true));
-
-				plugin.getServer().broadcastMessage(
-						FrozenFight.messagePrefix + p.getName() + "が透明になった!!");
-
-				// 削除タスク
-				int dur = plugin.getConfig().getInt("Item.Invisible.Duration");
-				new DeleteBuff("Invisible", p).runTaskLater(plugin, 20 * dur);
-				new SetArmor(p, armor).runTaskLater(plugin, 20 * dur);
-			}
-
-			// speedup
-
-			else if (item.getItemStack().getItemMeta().getDisplayName()
-					.equals("SpeedUp")) {
-				item.remove();
-				event.setCancelled(true);
-				p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 200,
-						1));
-				p.setMetadata("SpeedUp", new FixedMetadataValue(plugin, true));
-
-				plugin.getServer().broadcastMessage(
-						FrozenFight.messagePrefix + p.getName() + "の足が速くなった!!");
-
-				// 削除タスク
-				int dur = plugin.getConfig().getInt("Item.SpeedUp.Duration");
-				new DeleteBuff("SpeedUp", p).runTaskLater(plugin, 20 * dur);
-			}
-
-			// spawncannon
-
-			else if (item.getItemStack().getItemMeta().getDisplayName()
-					.equals("SpawnCannon")) {
-				item.remove();
-				event.setCancelled(true);
-				int dur = plugin.getConfig().getInt("Item.Invisible.Duration");
-				new SpawnCannon(p, dur / 2).runTaskTimer(plugin, 0, 40);
-
-				plugin.getServer().broadcastMessage(
-						FrozenFight.messagePrefix + p.getName()
-								+ "が雪だるまを召喚した!!");
-
 			}
 		}
 	}
@@ -837,6 +853,8 @@ public class FFListener implements Listener {
 
 						// スコア追加
 
+						Team hitPlayerTeam = FrozenFight.board
+								.getTeam(hitPlayerTeamName);
 						Team shooterTeam = FrozenFight.board
 								.getTeam(shooterTeamName);
 						Score personalScore = FrozenFight.board.getObjective(
@@ -851,12 +869,18 @@ public class FFListener implements Listener {
 						teamScore.setScore(teamScore.getScore() + 1);
 						shooter.playSound(shooter.getLocation(),
 								Sound.SUCCESSFUL_HIT, 1, 1);
+						hitPlayer.playSound(hitPlayer.getLocation(),
+								Sound.FIREWORK_BLAST, 1, 1);
 						shooter.giveExpLevels(1);
 						String hitMessage = FrozenFight.messagePrefix + ""
 								+ shooterTeam.getPrefix()
 								+ shooterTeam.getName() + " + 1pt! "
-								+ ChatColor.RESET + " (" + shooter.getName()
-								+ " → " + hitPlayer.getName() + ")";
+								+ ChatColor.RESET + " ("
+								+ shooterTeam.getPrefix() + shooter.getName()
+								+ shooterTeam.getSuffix() + " → "
+								+ hitPlayerTeam.getPrefix()
+								+ hitPlayer.getName()
+								+ hitPlayerTeam.getSuffix() + ")";
 						hitPlayer.sendMessage(hitMessage);
 						shooter.sendMessage(hitMessage);
 					} else {

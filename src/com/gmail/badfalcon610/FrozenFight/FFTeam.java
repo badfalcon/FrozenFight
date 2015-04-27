@@ -81,7 +81,8 @@ public class FFTeam {
 							.get(0).asFloat();
 					Location respawn = new Location(world, spawnx, spawny + 1,
 							spawnz, spawnyaw, 0);
-					player.setBedSpawnLocation(respawn, true);
+					player.setMetadata("res", new FixedMetadataValue(plugin,
+							respawn));
 					break;
 				}
 			}
@@ -91,6 +92,15 @@ public class FFTeam {
 	}
 
 	public static void warpToTeamSpawn(Player player) {
-		player.teleport(player.getBedSpawnLocation());
+		World world = player.getWorld();
+		String TeamName = player.getMetadata("TeamName").get(0).asString();
+		double spawnx = world.getMetadata(TeamName + "Resx").get(0).asDouble();
+		double spawny = world.getMetadata(TeamName + "Resy").get(0).asDouble();
+		double spawnz = world.getMetadata(TeamName + "Resz").get(0).asDouble();
+		float spawnyaw = world.getMetadata(TeamName + "Resyaw").get(0)
+				.asFloat();
+		Location respawn = new Location(world, spawnx, spawny + 1, spawnz,
+				spawnyaw, 0);
+		player.teleport(respawn);
 	}
 }

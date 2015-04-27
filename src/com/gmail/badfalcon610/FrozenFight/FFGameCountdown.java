@@ -4,6 +4,7 @@ import me.confuser.barapi.BarAPI;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -56,7 +57,7 @@ class FFGameCountdown extends BukkitRunnable {
 						PlayerInventory inventory = player.getInventory();
 						inventory.addItem(new ItemStack(Material.SNOW_BALL,
 								giveSnowNum));
-
+						player.playSound(player.getLocation(), Sound.CHICKEN_EGG_POP, 1, 1);
 					}
 				}
 				player.setExp(1.0f);

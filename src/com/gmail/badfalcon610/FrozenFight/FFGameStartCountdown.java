@@ -19,7 +19,7 @@ class FFGameStartCountdown extends BukkitRunnable {
 			Player[] players = Bukkit.getOnlinePlayers();
 			if (countdown <= 3) {
 				for (Player player : players) {
-					player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+					player.playSound(player.getLocation(), Sound.NOTE_PLING, 1, 1);
 				}
 			}
 			for (Player player : players) {
