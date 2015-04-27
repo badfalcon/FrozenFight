@@ -893,7 +893,7 @@ public class FFCommandExecutor implements CommandExecutor {
 				// "Time  " + gamemin + ":" + gamesecString);
 				FrozenFight.board.getObjective("Tscore").setDisplayName(
 						"チームスコア");
-				new FFScoreboard(plugin).showScore();
+				FFScoreboard.showScore();
 				plugin.getLogger().info("ゲーム開始コマンドが実行されました。");
 				plugin.getServer().broadcastMessage(
 						FrozenFight.messagePrefix + "もうすぐゲームが始まります。");
