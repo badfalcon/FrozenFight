@@ -57,7 +57,7 @@ public class FFTabCompleter implements TabCompleter {
 
 		if (command.getName().equalsIgnoreCase("ff")) {
 			if (args.length == 0 || args[0].length() == 0) {
-				tab = Arrays.asList("getmeta", "item", "ready", "set", "spect",
+				tab = Arrays.asList("item", "ready", "result", "set", "spect",
 						"stop", "teams");
 			}
 
@@ -175,6 +175,15 @@ public class FFTabCompleter implements TabCompleter {
 					return tab;
 				} else {
 					tab.addAll(Arrays.asList("ready"));
+				}
+			}
+
+			// result
+			else if ("result".startsWith(args[0])) {
+				if (args[0].equalsIgnoreCase("result")) {
+					return tab;
+				} else {
+					tab.addAll(Arrays.asList("result"));
 				}
 			}
 
@@ -361,6 +370,14 @@ public class FFTabCompleter implements TabCompleter {
 
 				} else {
 					tab.addAll(Arrays.asList("teams"));
+				}
+			}
+			// update
+			else if ("update".startsWith(args[0])) {
+				if (args[0].equalsIgnoreCase("update")) {
+					return tab;
+				} else {
+					tab.addAll(Arrays.asList("update"));
 				}
 			}
 

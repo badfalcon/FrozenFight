@@ -4,6 +4,7 @@ import me.confuser.barapi.BarAPI;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -33,6 +34,7 @@ public class FFRunnableFinish extends BukkitRunnable {
 				FrozenFight.messagePrefix + "ゲームが終了しました。");
 
 		for (Player player : players) {
+			player.playSound(player.getLocation(), Sound.ANVIL_USE, 1, 1);
 			if (!FFSpectator.isSpectating(player)) {
 				BarAPI.setMessage(player, "残り時間  finished");
 			}

@@ -10,6 +10,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Score;
 
 class FFGameCountdown extends BukkitRunnable {
 	private int maxtime;
@@ -47,8 +48,19 @@ class FFGameCountdown extends BukkitRunnable {
 		float currentExp = onlinePlayers[0].getExp();
 		for (Player player : onlinePlayers) {
 
+			Score time = FrozenFight.board.getObjective("Tscore").getScore(
+					Bukkit.getOfflinePlayer("Time"));
+			time.setScore(gametime);
+
 			BarAPI.setMessage(player, "残り時間  " + gamemin + ":" + gamesecString);
 			BarAPI.setHealth(player, (float) gametime / (float) maxtime * 100F);
+			if (gametime <= 10) {
+				player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+			}
+			if (gametime == 60) {
+				player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 1,
+						1);
+			}
 
 			if (currentExp - decreaseExp <= 0.0f) {
 				if (gametime != maxtime && gametime != 0) {
@@ -57,7 +69,8 @@ class FFGameCountdown extends BukkitRunnable {
 						PlayerInventory inventory = player.getInventory();
 						inventory.addItem(new ItemStack(Material.SNOW_BALL,
 								giveSnowNum));
-						player.playSound(player.getLocation(), Sound.CHICKEN_EGG_POP, 1, 1);
+						player.playSound(player.getLocation(),
+								Sound.CHICKEN_EGG_POP, 1, 1);
 					}
 				}
 				player.setExp(1.0f);

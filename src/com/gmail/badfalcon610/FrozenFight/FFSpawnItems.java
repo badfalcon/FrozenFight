@@ -7,7 +7,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -59,28 +58,10 @@ public class FFSpawnItems extends BukkitRunnable {
 
 	public void cancel() {
 		for (BukkitTask task : spawnItems) {
-			Bukkit.getServer().getScheduler()
-			.cancelTask(task.getTaskId());
+			Bukkit.getServer().getScheduler().cancelTask(task.getTaskId());
 		}
 	}
 
-	public class SpawnItem extends BukkitRunnable {
 
-		World world;
-		Location location;
-		ItemStack itemstack;
-
-		public SpawnItem(World w, Location l, ItemStack is) {
-			world = w;
-			location = l;
-			itemstack = is;
-		}
-
-		@Override
-		public void run() {
-			Item item = world.dropItem(location, itemstack);
-			item.setVelocity(new Vector(0, 0, 0));
-		}
-	}
 
 }

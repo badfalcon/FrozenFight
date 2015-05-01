@@ -1,9 +1,12 @@
 package com.gmail.badfalcon610.FrozenFight;
 
+import java.util.Collection;
+
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
 
 public class FFPlayer {
 
@@ -19,7 +22,13 @@ public class FFPlayer {
 			sb[i] = new ItemStack(Material.SNOW_BALL, 16);
 		}
 		p.getInventory().clear();
+
 		p.getInventory().setContents(sb);
+		// エフェクトクリア
+		Collection<PotionEffect> potions = p.getActivePotionEffects();
+		for (PotionEffect effect : potions) {
+			p.removePotionEffect(effect.getType());
+		}
 
 		// 経験値リセット
 

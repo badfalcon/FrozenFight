@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -19,6 +18,7 @@ public class FFRunnableStart extends BukkitRunnable {
 	FrozenFight plugin;
 	FFSpectator spec;
 	Player[] players;
+	static HashMap<String, ItemStack[]> armors;
 
 	public FFRunnableStart(FrozenFight plugin) {
 		this.plugin = plugin;
@@ -28,13 +28,13 @@ public class FFRunnableStart extends BukkitRunnable {
 
 	public void run() {
 		for (Player player : Bukkit.getOnlinePlayers()) {
-			player.playSound(player.getLocation(), Sound.LEVEL_UP, 1, 1);
+			player.playSound(player.getLocation(), Sound.NOTE_PLING, 1, 4);
 		}
 		plugin.getServer().broadcastMessage(
 				FrozenFight.messagePrefix + "ゲームを開始します。");
 
 		List<String> TeamNames = plugin.getConfig().getStringList("Team.Names");
-		HashMap<String, ItemStack[]> armors = new HashMap<String, ItemStack[]>();
+		armors = new HashMap<String, ItemStack[]>();
 		for (String teamName : TeamNames) {
 			String ConfigArmorType = plugin.getConfig().getString(
 					teamName + ".Armor");
@@ -67,9 +67,6 @@ public class FFRunnableStart extends BukkitRunnable {
 		double specHeight = plugin.getConfig().getDouble("Spectator.Height");
 		for (Player player : players) {
 			if (!FFSpectator.isSpectating(player)) {
-				if (player.getGameMode().equals(GameMode.CREATIVE)) {
-					player.setGameMode(GameMode.SURVIVAL);
-				}
 				player.setLevel(0);
 				String teamName = player.getMetadata("TeamName").get(0)
 						.asString();

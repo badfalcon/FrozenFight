@@ -9,6 +9,7 @@ import me.confuser.barapi.BarAPI;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -17,7 +18,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -172,7 +172,7 @@ public class FFCommandExecutor implements CommandExecutor {
 				sender.sendMessage(FrozenFight.messagePrefix
 						+ "SnowBallBattle ヘルプ\n" + "/l - ロビーへのワープ\n"
 						+ "/r - リスポーン(ゲーム内)\n" + "/all <message> - 全体チャット\n"
-						+ "/ff getmeta - メタデータを取得\n" + "/sbb help - ヘルプを表示\n"
+						+ "/sbb help - ヘルプを表示\n"
 						+ "/ff item list - アイテム一覧を表示\n"
 						+ "/ff item toggle [item] - [item]を有効/無効\n"
 						+ "/ff item dur [item] [time] - [item]の効果時間をを変更\n"
@@ -527,6 +527,152 @@ public class FFCommandExecutor implements CommandExecutor {
 				}
 
 			}
+			// ready
+
+			else if (args[0].equals("ready")) {
+				if (config.getString("Mode").equals("premade")) {
+					if (TeamsWithoutPlayers()) {
+						sender.sendMessage(FrozenFight.messagePrefix
+								+ "teams need members!");
+						return false;
+					}
+					if (MissingMembers()) {
+						sender.sendMessage(FrozenFight.messagePrefix
+								+ "missing member or wrong name!");
+						return false;
+					}
+				}
+
+				if (world.hasMetadata("ingame") || world.hasMetadata("ready")) {
+					sender.sendMessage(FrozenFight.messagePrefix
+							+ "ゲーム中はこのコマンドは実行できません");
+					return false;
+				}
+				if (config.getStringList("Team.Names").size() < 2) {
+					sender.sendMessage(FrozenFight.messagePrefix
+							+ "チーム数が少なすぎます。");
+					return false;
+				}
+				World world = Bukkit.getServer().getWorlds().get(0);
+				if (!world.hasMetadata("lobbyset")) {
+					sender.sendMessage(FrozenFight.messagePrefix
+							+ "ロビーが設定されていません。");
+					return false;
+				}
+				for (String teamName : config.getStringList("Team.Names")) {
+					if (world.hasMetadata(teamName + "Set")) {
+						continue;
+					} else {
+						Team team = FrozenFight.board.getTeam(teamName);
+						sender.sendMessage(FrozenFight.messagePrefix
+								+ team.getPrefix() + team.getName()
+								+ team.getSuffix() + "のリスポーンポイントが設定されていません。");
+						return false;
+					}
+				}
+				for (String itemName : config.getStringList("Item.Names")) {
+					if (world.hasMetadata(itemName + "Set")) {
+						continue;
+					} else {
+						sender.sendMessage(FrozenFight.messagePrefix + itemName
+								+ "のスポーンポイントが設定されていません。");
+						return false;
+					}
+				}
+
+				// 確認完了
+
+				FFScoreboard snowboard = new FFScoreboard(plugin);
+				snowboard.resetScore();
+
+				snowboard.removePlayers();
+				FFTeam pjt = new FFTeam(plugin);
+				if (config.getString("Mode").equals("premade")) {
+
+					// premade
+
+					// check
+
+					for (String teamName : config.getStringList("Team.Names")) {
+						for (String teamMember : config.getStringList(teamName
+								+ "." + "Members")) {
+							pjt.joinTeam(Bukkit.getPlayer(teamMember), teamName);
+						}
+					}
+
+					for (Player player : players) {
+						if (!player.hasMetadata("TeamName")) {
+							spec.setSpectate(player);
+						}
+					}
+
+				} else {
+
+					// random
+
+					for (Player player : players) {
+						pjt.joinRandomTeam(player);
+
+						// ↓途中参加者への例外処理が不完全
+						if (!spec.isSpectator(player.getName())) {
+							if (player.getGameMode().equals(GameMode.CREATIVE)) {
+								player.setGameMode(GameMode.SURVIVAL);
+							}
+
+							FFTeam.warpToTeamSpawn(player);
+
+							player.setWalkSpeed(0.001F);
+							PotionEffect noJump = new PotionEffect(
+									PotionEffectType.JUMP, 200, -100, false);
+							player.addPotionEffect(noJump);
+							for (Player player1 : players) {
+								player.hidePlayer(player1);
+							}
+						} else {
+							spec.setSpectate(player);
+						}
+					}
+				}
+				world.setMetadata("ready", new FixedMetadataValue(plugin, true));
+				int MaxTime = config.getInt("Game.GameTime") * 60;
+				int gamemin = MaxTime / 60;
+				int gamesec = MaxTime % 60;
+
+				String gamesecString;
+				if (gamesec < 10) {
+					gamesecString = "0" + String.valueOf(gamesec);
+				} else {
+					gamesecString = String.valueOf(gamesec);
+				}
+
+				// SnowBallBattle.board.getObjective("Tscore").setDisplayName(
+				// "Time  " + gamemin + ":" + gamesecString);
+				FrozenFight.board.getObjective("Tscore").setDisplayName(
+						"チームスコア");
+				FFScoreboard.showScore();
+				plugin.getLogger().info("ゲーム開始コマンドが実行されました。");
+				plugin.getServer().broadcastMessage(
+						FrozenFight.messagePrefix + "もうすぐゲームが始まります。");
+
+				for (Player player : players) {
+					BarAPI.setMessage(player, "残り時間  " + gamemin + ":"
+							+ gamesecString);
+				}
+
+				new FFGameStartCountdown(count).runTaskTimer(plugin, 0, 20);
+				gameStart = new FFRunnableStart(this.plugin).runTaskLater(
+						this.plugin, 20 * count);
+				spawnItem = new FFSpawnItems(plugin).runTaskLater(plugin,
+						20 * count);
+				gameTimeCount = new FFGameCountdown(plugin).runTaskTimer(
+						plugin, 20 * count, 20);
+				gameEnd = new FFRunnableFinish(this.plugin).runTaskLater(
+						this.plugin,
+						20 * (count + 60 * config.getInt("Game.GameTime")));
+				return true;
+			}
+
+			// result
 
 			else if (args[0].equals("result")) {
 				if (!world.hasMetadata("result")) {
@@ -618,12 +764,7 @@ public class FFCommandExecutor implements CommandExecutor {
 				for (OfflinePlayer mvp : mvpPlayers) {
 					if (mvp.isOnline()) {
 						Player player = (Player) mvp;
-						Location loc = player.getLocation();
-						for (int i = 0; i < 5; i++) {
-							// player.playSound(loc, Sound.FIREWORK_LAUNCH, 1,
-							// 1);
-							world.spawnEntity(loc, EntityType.FIREWORK);
-						}
+						new FFFireworks(player, 20).runTaskTimer(plugin, 0, 10);
 					}
 				}
 
@@ -644,14 +785,12 @@ public class FFCommandExecutor implements CommandExecutor {
 					}
 				}
 
-				FFScoreboard snowboard = new FFScoreboard(plugin);
-				snowboard.resetScore();
-
 				world.removeMetadata("result", plugin);
 
 				return true;
 
 			}
+
 			// set
 
 			else if (args[0].equals("set")) {
@@ -750,142 +889,6 @@ public class FFCommandExecutor implements CommandExecutor {
 							+ sender.getName() + ")を特定できませんでした。");
 					return false;
 				}
-			}
-
-			// ready
-
-			else if (args[0].equals("ready")) {
-				if (config.getString("Mode").equals("premade")) {
-					if (TeamsWithoutPlayers()) {
-						sender.sendMessage(FrozenFight.messagePrefix
-								+ "teams need members!");
-						return false;
-					}
-					if (MissingMembers()) {
-						sender.sendMessage(FrozenFight.messagePrefix
-								+ "missing member or wrong name!");
-						return false;
-					}
-				}
-
-				if (world.hasMetadata("ingame") || world.hasMetadata("ready")) {
-					sender.sendMessage(FrozenFight.messagePrefix
-							+ "ゲーム中はこのコマンドは実行できません");
-					return false;
-				}
-				if (config.getStringList("Team.Names").size() < 2) {
-					sender.sendMessage(FrozenFight.messagePrefix
-							+ "チーム数が少なすぎます。");
-					return false;
-				}
-				World world = Bukkit.getServer().getWorlds().get(0);
-				if (!world.hasMetadata("lobbyset")) {
-					sender.sendMessage(FrozenFight.messagePrefix
-							+ "ロビーが設定されていません。");
-					return false;
-				}
-				for (String teamName : config.getStringList("Team.Names")) {
-					if (world.hasMetadata(teamName + "Set")) {
-						continue;
-					} else {
-						Team team = FrozenFight.board.getTeam(teamName);
-						sender.sendMessage(FrozenFight.messagePrefix
-								+ team.getPrefix() + team.getName()
-								+ team.getSuffix() + "のリスポーンポイントが設定されていません。");
-						return false;
-					}
-				}
-				for (String itemName : config.getStringList("Item.Names")) {
-					if (world.hasMetadata(itemName + "Set")) {
-						continue;
-					} else {
-						sender.sendMessage(FrozenFight.messagePrefix + itemName
-								+ "のスポーンポイントが設定されていません。");
-						return false;
-					}
-				}
-				new FFScoreboard(plugin).removePlayers();
-				FFTeam pjt = new FFTeam(plugin);
-				if (config.getString("Mode").equals("premade")) {
-
-					// premade
-
-					// check
-
-					for (String teamName : config.getStringList("Team.Names")) {
-						for (String teamMember : config.getStringList(teamName
-								+ "." + "Members")) {
-							pjt.joinTeam(Bukkit.getPlayer(teamMember), teamName);
-						}
-					}
-
-					for (Player player : players) {
-						if (!player.hasMetadata("TeamName")) {
-							spec.setSpectate(player);
-						}
-					}
-
-				} else {
-
-					// random
-
-					for (Player player : players) {
-						pjt.joinRandomTeam(player);
-
-						// ↓途中参加者への例外処理が不完全
-						if (!spec.isSpectator(player.getName())) {
-
-							FFTeam.warpToTeamSpawn(player);
-
-							player.setWalkSpeed(0.001F);
-							PotionEffect noJump = new PotionEffect(
-									PotionEffectType.JUMP, 200, -100, false);
-							player.addPotionEffect(noJump);
-							for (Player player1 : players) {
-								player.hidePlayer(player1);
-							}
-						} else {
-							spec.setSpectate(player);
-						}
-					}
-				}
-				world.setMetadata("ready", new FixedMetadataValue(plugin, true));
-				int MaxTime = config.getInt("Game.GameTime") * 60;
-				int gamemin = MaxTime / 60;
-				int gamesec = MaxTime % 60;
-
-				String gamesecString;
-				if (gamesec < 10) {
-					gamesecString = "0" + String.valueOf(gamesec);
-				} else {
-					gamesecString = String.valueOf(gamesec);
-				}
-
-				// SnowBallBattle.board.getObjective("Tscore").setDisplayName(
-				// "Time  " + gamemin + ":" + gamesecString);
-				FrozenFight.board.getObjective("Tscore").setDisplayName(
-						"チームスコア");
-				FFScoreboard.showScore();
-				plugin.getLogger().info("ゲーム開始コマンドが実行されました。");
-				plugin.getServer().broadcastMessage(
-						FrozenFight.messagePrefix + "もうすぐゲームが始まります。");
-
-				for (Player player : players) {
-					BarAPI.setMessage(player, "残り時間  " + gamemin + ":"
-							+ gamesecString);
-				}
-
-				new FFGameStartCountdown(count).runTaskTimer(plugin, 0, 20);
-				gameStart = new FFRunnableStart(this.plugin).runTaskLater(
-						this.plugin, 20 * count);
-				spawnItem = new FFSpawnItems(plugin).runTaskLater(plugin,
-						20 * count);
-				gameTimeCount = new FFGameCountdown(plugin).runTaskTimer(
-						plugin, 20 * count, 20);
-				gameEnd = new FFRunnableFinish(this.plugin).runTaskLater(
-						this.plugin,
-						20 * (count + 60 * config.getInt("Game.GameTime")));
-				return true;
 			}
 
 			// spect

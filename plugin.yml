@@ -1,6 +1,6 @@
 name: FrozenFight
 main: com.gmail.badfalcon610.FrozenFight.FrozenFight
-version: 0.9
+version: 1.0
 prefix: FF
 commands:
    ff:

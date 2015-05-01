@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -33,8 +34,11 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent.Result;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -162,22 +166,68 @@ public class FFListener implements Listener {
 	}
 
 	@EventHandler
+	public void onAsyncPlayerPreLogin(AsyncPlayerPreLoginEvent e) {
+		if (world.hasMetadata("ready")) {
+			e.disallow(Result.KICK_OTHER, "ゲーム開始までしばらくお待ちください。");
+		}
+	}
+
+	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		Player player = event.getPlayer();
-		if (world.hasMetadata("ingame") || world.hasMetadata("ready")) {
+		if (world.hasMetadata("ready")) {
+/*
+			// 準備時
+
+			if (plugin.getConfig().getString("Mode").equals("premade")) {
+
+				// プリメイド
+
+				if (player.hasMetadata("TeamName")) {
+					FFPlayer.Respawn(player, config);
+				} else {
+					player.removeMetadata("TeamName", plugin);
+					player.removeMetadata("teamnumber", plugin);
+					player.removeMetadata("teamcolor", plugin);
+					player.removeMetadata("spectator", plugin);
+
+					player.sendMessage(FrozenFight.messagePrefix
+							+ "現在のゲームが終了するまでお待ちください。");
+					player.setScoreboard(FrozenFight.board);
+					spec.setSpectate(player);
+					for (Player player1 : Bukkit.getOnlinePlayers()) {
+						if (!FFSpectator.isSpectating(player1)) {
+
+							// 観戦者を隠す
+							player1.hidePlayer(player);
+						}
+					}
+
+				}
+
+			} else {
+				// ランダムモード
+
+				new FFTeam(plugin).joinRandomTeam(player);
+				player.getInventory().setArmorContents(
+						FFRunnableStart.armors.get(player
+								.getMetadata("TeamName").get(0).asString()));
+				FFPlayer.Respawn(player, config);
+			}
+*/
+		} else if (world.hasMetadata("ingame")) {
 
 			// ゲーム中
 
-			if (player.hasMetadata("teamName")) {
+			if (world.hasMetadata("gameStart")) {
 
-				// チームに所属している時
+				if (player.getLastPlayed() < world.getMetadata("gameStart")
+						.get(0).asLong()) {
 
-				if (world.hasMetadata("gameStart")) {
+					// この試合未参加
 
-					if (player.getLastPlayed() < world.getMetadata("gameStart")
-							.get(0).asLong()) {
-
-						// この試合に参加していない場合
+					if (plugin.getConfig().getString("Mode").equals("premade")) {
+						// プリメイド
 
 						player.removeMetadata("teamName", plugin);
 						player.removeMetadata("teamnumber", plugin);
@@ -197,37 +247,22 @@ public class FFListener implements Listener {
 						}
 
 					} else {
+						// ランダムモード
 
-						// この試合に参加している時
-						// 何もしない
-
+						new FFTeam(plugin).joinRandomTeam(player);
+						player.getInventory().setArmorContents(
+								FFRunnableStart.armors.get(player
+										.getMetadata("TeamName").get(0)
+										.asString()));
+						FFPlayer.Respawn(player, config);
 					}
 
-				}
-
-			} else {
-				// チームに所属していない時
-
-				if (plugin.getConfig().getString("Mode").equals("premade")) {
-					// プリメイド
-
-					player.sendMessage(FrozenFight.messagePrefix
-							+ "現在のゲームが終了するまでお待ちください。");
-					player.setScoreboard(FrozenFight.board);
-					spec.setSpectate(player);
-					for (Player player1 : Bukkit.getOnlinePlayers()) {
-						if (!FFSpectator.isSpectating(player1)) {
-
-							// 観戦者を隠す
-
-							player1.hidePlayer(player);
-						}
-					}
 				} else {
-					// ランダムモード
 
-					new FFTeam(plugin).joinRandomTeam(player);
 					FFPlayer.Respawn(player, config);
+					// この試合に参加している時
+					// 何もしない
+
 				}
 
 			}
@@ -239,13 +274,14 @@ public class FFListener implements Listener {
 			}
 
 			// ゲーム外
-			player.removeMetadata("teamName", plugin);
+			player.removeMetadata("TeamName", plugin);
 			player.removeMetadata("teamnumber", plugin);
 			player.removeMetadata("teamcolor", plugin);
 			player.removeMetadata("spectator", plugin);
 
 			new FFLobby(plugin).warpLobby(player);
 		}
+
 	}
 
 	@EventHandler
@@ -281,6 +317,11 @@ public class FFListener implements Listener {
 	}
 
 	@EventHandler
+	public void onHangingBreakByEntity(HangingBreakByEntityEvent event) {
+		event.setCancelled(true);
+	}
+
+	@EventHandler
 	void onEntityCombust(EntityCombustEvent e) {
 		e.setCancelled(true);
 	}
@@ -307,88 +348,93 @@ public class FFListener implements Listener {
 	@EventHandler
 	public void onPlayerInteract(PlayerInteractEvent event) {
 		Player player = event.getPlayer();
-		if (!world.hasMetadata("ingame")) {
 
-			if (world.hasMetadata("ready")) {
+		if (world.hasMetadata("ready")) {
+			event.setCancelled(true);
 
-				event.setCancelled(true);
-
-			} else {
-
-				// ゲーム外
-
-				if (player.isOp()) {
-
-					// キャスト処理
-
-					if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-
-						// 右クリック
-
-						if (player.getItemInHand().getType() == Material
-								.getMaterial(plugin.getConfig().getString(
-										"LocationItem"))) {
-
-							// コンフィグに記載されてるアイテムを持っている場合
-
-							Location loc = event.getClickedBlock()
-									.getLocation();
-							if (loc != null) {
-
-								// クリック先が空気じゃない場合、位置を記録
-
-								player.setMetadata(
-										"Locx",
-										new FixedMetadataValue(plugin, loc
-												.getBlockX() + 0.5));
-								player.setMetadata(
-										"Locy",
-										new FixedMetadataValue(plugin, loc
-												.getBlockY()));
-								player.setMetadata(
-										"Locz",
-										new FixedMetadataValue(plugin, loc
-												.getBlockZ() + 0.5));
-								player.setMetadata("Locyaw",
-										new FixedMetadataValue(plugin,
-												convertYaw(player.getLocation()
-														.getYaw())));
-								player.setMetadata("Location",
-										new FixedMetadataValue(plugin, true));
-								player.sendMessage(FrozenFight.messagePrefix
-										+ loc.getBlockX() + 0.5 + " , "
-										+ loc.getBlockY() + " , "
-										+ loc.getBlockZ() + 0.5 + " を記録しました。");
-							}
-						}
+		} else if (world.hasMetadata("ingame")) {
+			// ゲーム中
+			if (event.getAction() == Action.RIGHT_CLICK_AIR) {
+				if (event.getMaterial() == Material.SNOW_BALL) {
+					if (player.hasMetadata("TripleShot")) {
+						TripleShot(player);
 					}
 				} else {
-
-					// ゲスト処理
-
 					event.setCancelled(true);
 				}
-			}
-		} else {
+			} else if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+				Material m = event.getClickedBlock().getType();
+				if (m == Material.WOOD_BUTTON || m == Material.STONE_BUTTON) {
 
-			// ゲーム中
-
-			if ((event.getAction() == Action.RIGHT_CLICK_AIR || event
-					.getAction() == Action.RIGHT_CLICK_BLOCK)
-					&& event.getMaterial() == Material.SNOW_BALL) {
-
-				// 右クリックかつ雪玉
-
-				if (player.hasMetadata("TripleShot")) {
-					TripleShot(player);
+				} else {
+					if (event.getMaterial() == Material.SNOW_BALL) {
+						if (player.hasMetadata("TripleShot")) {
+							TripleShot(player);
+						}
+					} else {
+						event.setCancelled(true);
+					}
 				}
+			} else if (event.getAction() == Action.PHYSICAL) {
+				Material m = event.getClickedBlock().getType();
+				if (m == Material.STONE_PLATE || m == Material.WOOD_PLATE) {
 
+				} else {
+					event.setCancelled(true);
+				}
+			} else {
+				event.setCancelled(true);
+			}
+
+		} else {
+			// ゲーム外
+
+			if (player.isOp()) {
+
+				// キャスト処理
+
+				if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+
+					// 右クリック
+
+					if (player.getItemInHand().getType() == Material
+							.getMaterial(plugin.getConfig().getString(
+									"LocationItem"))) {
+
+						// コンフィグに記載されてるアイテムを持っている場合
+
+						Location loc = event.getClickedBlock().getLocation();
+						if (loc != null) {
+
+							// クリック先が空気じゃない場合、位置を記録
+
+							player.setMetadata("Locx", new FixedMetadataValue(
+									plugin, loc.getBlockX() + 0.5));
+							player.setMetadata("Locy", new FixedMetadataValue(
+									plugin, loc.getBlockY()));
+							player.setMetadata("Locz", new FixedMetadataValue(
+									plugin, loc.getBlockZ() + 0.5));
+							player.setMetadata("Locyaw",
+									new FixedMetadataValue(plugin,
+											convertYaw(player.getLocation()
+													.getYaw())));
+							player.setMetadata("Location",
+									new FixedMetadataValue(plugin, true));
+							player.sendMessage(FrozenFight.messagePrefix
+									+ loc.getBlockX() + 0.5 + " , "
+									+ loc.getBlockY() + " , " + loc.getBlockZ()
+									+ 0.5 + " を記録しました。");
+
+						}
+					}
+				}
 			} else {
 
-				// 以外
+				// ゲスト処理
 
 				event.setCancelled(true);
 			}
+
 		}
 	}
 
@@ -397,6 +443,10 @@ public class FFListener implements Listener {
 
 		if (world.hasMetadata("ingame")) {
 			// ingame判定
+			if (e.getRawSlot() == 5 || e.getRawSlot() == 6
+					|| e.getRawSlot() == 7 || e.getRawSlot() == 8) {
+				e.setCancelled(true);
+			}
 
 			if (e.getCurrentItem() != null) {
 				ItemStack is = e.getCurrentItem();
@@ -849,6 +899,11 @@ public class FFListener implements Listener {
 
 						event.setCancelled(true);
 
+						world.playEffect(hitPlayer.getEyeLocation(),
+								Effect.STEP_SOUND, 78);
+						// new FFHitParticle(hitPlayer.getEyeLocation(), 2)
+						// .runTaskTimer(plugin, 0, 5);
+
 						FFPlayer.Respawn(hitPlayer, config);
 
 						// スコア追加
@@ -866,11 +921,14 @@ public class FFListener implements Listener {
 										+ shooterTeam.getSuffix()));
 
 						personalScore.setScore(personalScore.getScore() + 1);
+
 						teamScore.setScore(teamScore.getScore() + 1);
+
 						shooter.playSound(shooter.getLocation(),
-								Sound.SUCCESSFUL_HIT, 1, 1);
+								Sound.LEVEL_UP, 1, 1);
 						hitPlayer.playSound(hitPlayer.getLocation(),
 								Sound.FIREWORK_BLAST, 1, 1);
+						// bukkitrunnable
 						shooter.giveExpLevels(1);
 						String hitMessage = FrozenFight.messagePrefix + ""
 								+ shooterTeam.getPrefix()
