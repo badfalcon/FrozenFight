@@ -194,7 +194,7 @@ public class FFTabCompleter implements TabCompleter {
 						return tab;
 					}
 					if (args[1].length() == 0) {
-						tab.addAll(Arrays.asList("lobby", "spawn"));
+						tab.addAll(Arrays.asList("lobby", "spawn", "spect"));
 					}
 					// lobby
 					else if ("lobby".startsWith(args[1])) {
@@ -229,6 +229,15 @@ public class FFTabCompleter implements TabCompleter {
 							tab.addAll(Arrays.asList("spawn"));
 						}
 					}
+					// lobby
+					else if ("spect".startsWith(args[1])) {
+						if (args[1].equalsIgnoreCase("spect")) {
+							return tab;
+						} else {
+							tab.addAll(Arrays.asList("spect"));
+						}
+					}
+					// spawn
 
 				} else {
 					tab.addAll(Arrays.asList("set"));

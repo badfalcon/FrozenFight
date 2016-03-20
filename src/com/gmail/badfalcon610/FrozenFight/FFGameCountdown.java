@@ -9,7 +9,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Score;
 
 class FFGameCountdown extends BukkitRunnable {
@@ -18,12 +17,14 @@ class FFGameCountdown extends BukkitRunnable {
 	private int maxFillTime;
 	private int giveSnowNum;
 	private float decreaseExp;
+	private float exp;
 
 	public FFGameCountdown(FrozenFight plugin) {
 		maxtime = plugin.getConfig().getInt("Game.GameTime") * 60;
 		gametime = plugin.getConfig().getInt("Game.GameTime") * 60;
 		maxFillTime = plugin.getConfig().getInt("Game.GiveSnowBallTime");
 		giveSnowNum = plugin.getConfig().getInt("Game.GiveSnowBallNum");
+		exp = 1.0f;
 		decreaseExp = (float) (1.0f / maxFillTime);
 	}
 
@@ -41,7 +42,7 @@ class FFGameCountdown extends BukkitRunnable {
 		if (gametime == 60) {
 			Bukkit.getServer().broadcastMessage(
 					FrozenFight.messagePrefix + "----終了1分前----");
-			FFScoreboard.hideScore(DisplaySlot.SIDEBAR);
+			FFScoreboard.hideScore();
 		}
 
 		Player[] onlinePlayers = Bukkit.getOnlinePlayers();

@@ -1,5 +1,6 @@
 package com.gmail.badfalcon610.FrozenFight;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -106,10 +107,119 @@ public class FFScoreboard {
 		List<String> teamNames = plugin.getConfig().getStringList("Team.Names");
 		for (String teamName : teamNames) {
 			Team team = board.getTeam(teamName);
+			Set<OfflinePlayer> members = team.getPlayers();
+
+			for (OfflinePlayer player : members) {
+				team.removePlayer(player);
+			}
+
 			Score teamscore = Tscores.getScore(Bukkit.getOfflinePlayer(team
 					.getPrefix() + teamName + team.getSuffix()));
 			teamscore.setScore(0);
 		}
+	}
+
+	public void showResult() {
+		Player[] players = Bukkit.getOnlinePlayers();
+		FFScoreboard.showScore();
+
+		List<OfflinePlayer> winnerTeams = new ArrayList<OfflinePlayer>();
+		List<String> teamNames = plugin.getConfig().getStringList("Team.Names");
+		int winnerscore = 0;
+		for (String teamName : teamNames) {
+			Team t = FrozenFight.board.getTeam(teamName);
+			OfflinePlayer team = Bukkit.getOfflinePlayer(t.getPrefix()
+					+ teamName + t.getSuffix());
+			Score tsc = FrozenFight.board.getObjective("Tscore").getScore(team);
+			if (tsc.getScore() > winnerscore) {
+				winnerTeams = new ArrayList<OfflinePlayer>();
+				winnerTeams.add(team);
+				winnerscore = tsc.getScore();
+			} else if (tsc.getScore() == winnerscore) {
+				winnerTeams.add(team);
+			}
+		}
+		String winnerNames = "";
+		for (OfflinePlayer winner : winnerTeams) {
+			Team winnerTeam = FrozenFight.board.getTeam(ChatColor
+					.stripColor(winner.getName()));
+			String winnerName = winnerTeam.getPrefix() + winner.getName()
+					+ winnerTeam.getSuffix();
+			winnerNames += winnerName;
+			if (!winner.equals(winnerTeams.get(winnerTeams.size() - 1))) {
+				winnerNames += ",";
+			}
+		}
+
+		List<OfflinePlayer> mvpPlayers = new ArrayList<OfflinePlayer>();
+		int mvpscore = 0;
+		for (Player player : players) {
+			if (!FFSpectator.isSpectating(player)) {
+				Score sc = FrozenFight.board.getObjective("Pscore").getScore(
+						player);
+				if (sc.getScore() > mvpscore) {
+					mvpPlayers = new ArrayList<OfflinePlayer>();
+					mvpPlayers.add(player);
+					mvpscore = sc.getScore();
+				} else if (sc.getScore() == mvpscore) {
+					mvpPlayers.add(player);
+				}
+			}
+		}
+		String mvpNames = "";
+		for (OfflinePlayer mvp : mvpPlayers) {
+			Team mvpTeam = Bukkit
+					.getPlayer(mvp.getName())
+					.getScoreboard()
+					.getTeam(
+							mvp.getPlayer().getMetadata("TeamName").get(0)
+									.asString());
+			String mvpName = mvpTeam.getPrefix() + mvp.getName()
+					+ mvpTeam.getSuffix();
+			mvpNames += mvpName;
+			if (!mvp.equals(mvpPlayers.get(mvpPlayers.size() - 1))) {
+				mvpNames += ",";
+			}
+		}
+
+		if (winnerTeams.size() == 1) {
+			plugin.getServer().broadcastMessage(
+					FrozenFight.messagePrefix + "チーム" + winnerNames
+							+ "の勝利です！ スコア:" + winnerscore + "pt");
+		} else {
+			plugin.getServer().broadcastMessage(
+					FrozenFight.messagePrefix + "チーム" + winnerNames
+							+ "による同点に終わりました。 スコア:" + winnerscore + "pt");
+		}
+
+		plugin.getServer().broadcastMessage(
+				FrozenFight.messagePrefix + "この試合のMVPは" + mvpNames + "でした。スコア:"
+						+ mvpscore + "pt");
+
+		for (OfflinePlayer mvp : mvpPlayers) {
+			if (mvp.isOnline()) {
+				Player player = (Player) mvp;
+				new FFFireworks(player, 20).runTaskTimer(plugin, 0, 10);
+			}
+		}
+		Objective pscore = FrozenFight.board.getObjective("Pscore");
+
+		for (Player player : players) {
+			Score personal = pscore.getScore(player);
+			if (!FFSpectator.isSpectating(player)) {
+
+				// 個人成績の表示とゲームデータクリア
+
+				FrozenFight.board.getTeam(
+						player.getMetadata("TeamName").get(0).asString())
+						.removePlayer(player);
+				player.sendMessage(FrozenFight.messagePrefix + "あなたのスコアは "
+						+ personal.getScore() + "pt でした。");
+				// SnowBallBattle.board.getObjective("Tscore").setDisplayName("Time  finished");
+				player.removeMetadata("TeamName", plugin);
+			}
+		}
+
 	}
 
 	public static void showScore() {

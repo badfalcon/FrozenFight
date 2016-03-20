@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import me.confuser.barapi.BarAPI;
 
@@ -24,7 +25,9 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
+import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 import org.bukkit.util.Vector;
 
@@ -164,8 +167,6 @@ public class FFCommandExecutor implements CommandExecutor {
 				sender.sendMessage(FrozenFight.messagePrefix + "パラメータが足りません。");
 				return true;
 			}
-			Player[] players = plugin.getServer().getOnlinePlayers();
-
 			// help
 
 			if (args[0].equals("help")) {
@@ -594,13 +595,26 @@ public class FFCommandExecutor implements CommandExecutor {
 					// check
 
 					for (String teamName : config.getStringList("Team.Names")) {
-						for (String teamMember : config.getStringList(teamName
+						for (String memberName : config.getStringList(teamName
 								+ "." + "Members")) {
-							pjt.joinTeam(Bukkit.getPlayer(teamMember), teamName);
+							Player member = Bukkit.getPlayer(memberName);
+							pjt.joinTeam(member, teamName);
+							FFTeam.warpToTeamSpawn(member);
+
+							member.setWalkSpeed(0.001f);
+							PotionEffect noJump = new PotionEffect(
+									PotionEffectType.JUMP, 200, -100, false);
+							member.addPotionEffect(noJump);
+							for (Player player1 : plugin.getServer()
+									.getOnlinePlayers()) {
+								member.hidePlayer(player1);
+							}
 						}
 					}
 
-					for (Player player : players) {
+					for (Player player : plugin.getServer().getOnlinePlayers()) {
+						Scoreboard board = FrozenFight.board;
+						player.setScoreboard(board);
 						if (!player.hasMetadata("TeamName")) {
 							spec.setSpectate(player);
 						}
@@ -610,7 +624,9 @@ public class FFCommandExecutor implements CommandExecutor {
 
 					// random
 
-					for (Player player : players) {
+					for (Player player : plugin.getServer().getOnlinePlayers()) {
+						Scoreboard board = FrozenFight.board;
+						player.setScoreboard(board);
 						pjt.joinRandomTeam(player);
 
 						// ↓途中参加者への例外処理が不完全
@@ -621,11 +637,12 @@ public class FFCommandExecutor implements CommandExecutor {
 
 							FFTeam.warpToTeamSpawn(player);
 
-							player.setWalkSpeed(0.001F);
+							player.setWalkSpeed(0.001f);
 							PotionEffect noJump = new PotionEffect(
 									PotionEffectType.JUMP, 200, -100, false);
 							player.addPotionEffect(noJump);
-							for (Player player1 : players) {
+							for (Player player1 : plugin.getServer()
+									.getOnlinePlayers()) {
 								player.hidePlayer(player1);
 							}
 						} else {
@@ -654,7 +671,7 @@ public class FFCommandExecutor implements CommandExecutor {
 				plugin.getServer().broadcastMessage(
 						FrozenFight.messagePrefix + "もうすぐゲームが始まります。");
 
-				for (Player player : players) {
+				for (Player player : plugin.getServer().getOnlinePlayers()) {
 					BarAPI.setMessage(player, "残り時間  " + gamemin + ":"
 							+ gamesecString);
 				}
@@ -687,12 +704,30 @@ public class FFCommandExecutor implements CommandExecutor {
 				List<String> teamNames = plugin.getConfig().getStringList(
 						"Team.Names");
 				int winnerscore = 0;
+
+				List<OfflinePlayer> mvpPlayers = new ArrayList<OfflinePlayer>();
+				int mvpscore = 0;
+
 				for (String teamName : teamNames) {
 					Team t = FrozenFight.board.getTeam(teamName);
 					OfflinePlayer team = Bukkit.getOfflinePlayer(t.getPrefix()
 							+ teamName + t.getSuffix());
 					Score tsc = FrozenFight.board.getObjective("Tscore")
 							.getScore(team);
+
+					Set<OfflinePlayer> players = t.getPlayers();
+					for (OfflinePlayer player : players) {
+						Score sc = FrozenFight.board.getObjective("Pscore")
+								.getScore(player);
+						if (sc.getScore() > mvpscore) {
+							mvpPlayers = new ArrayList<OfflinePlayer>();
+							mvpPlayers.add(player);
+							mvpscore = sc.getScore();
+						} else if (sc.getScore() == mvpscore) {
+							mvpPlayers.add(player);
+						}
+					}
+
 					if (tsc.getScore() > winnerscore) {
 						winnerTeams = new ArrayList<OfflinePlayer>();
 						winnerTeams.add(team);
@@ -705,6 +740,7 @@ public class FFCommandExecutor implements CommandExecutor {
 				for (OfflinePlayer winner : winnerTeams) {
 					Team winnerTeam = FrozenFight.board.getTeam(ChatColor
 							.stripColor(winner.getName()));
+
 					String winnerName = winnerTeam.getPrefix()
 							+ winner.getName() + winnerTeam.getSuffix();
 					winnerNames += winnerName;
@@ -713,21 +749,6 @@ public class FFCommandExecutor implements CommandExecutor {
 					}
 				}
 
-				List<OfflinePlayer> mvpPlayers = new ArrayList<OfflinePlayer>();
-				int mvpscore = 0;
-				for (Player player : players) {
-					if (!FFSpectator.isSpectating(player)) {
-						Score sc = FrozenFight.board.getObjective("Pscore")
-								.getScore(player);
-						if (sc.getScore() > mvpscore) {
-							mvpPlayers = new ArrayList<OfflinePlayer>();
-							mvpPlayers.add(player);
-							mvpscore = sc.getScore();
-						} else if (sc.getScore() == mvpscore) {
-							mvpPlayers.add(player);
-						}
-					}
-				}
 				String mvpNames = "";
 				for (OfflinePlayer mvp : mvpPlayers) {
 					Team mvpTeam = Bukkit
@@ -767,21 +788,26 @@ public class FFCommandExecutor implements CommandExecutor {
 						new FFFireworks(player, 20).runTaskTimer(plugin, 0, 10);
 					}
 				}
+				Objective pscore = FrozenFight.board.getObjective("Pscore");
 
-				for (Player player : players) {
-					if (!FFSpectator.isSpectating(player)) {
+				for (String teamName : teamNames) {
+					Team t = FrozenFight.board.getTeam(teamName);
+					Set<OfflinePlayer> players = t.getPlayers();
+					for (OfflinePlayer player : players) {
 
-						// 個人成績の表示とゲームデータクリア
+						if (player.isOnline()) {
+							Player p = Bukkit.getPlayer(player.getName());
 
-						Score personal = FrozenFight.board.getObjective(
-								"Pscore").getScore(player);
-						FrozenFight.board.getTeam(
-								player.getMetadata("TeamName").get(0)
-										.asString()).removePlayer(player);
-						player.sendMessage(FrozenFight.messagePrefix
-								+ "あなたのスコアは " + personal.getScore() + "pt でした。");
-						// SnowBallBattle.board.getObjective("Tscore").setDisplayName("Time  finished");
-						player.removeMetadata("TeamName", plugin);
+							Score personal = pscore.getScore(player);
+
+							// 個人成績の表示とゲームデータクリア
+
+							p.sendMessage(FrozenFight.messagePrefix
+									+ "あなたのスコアは " + personal.getScore()
+									+ "pt でした。");
+							// SnowBallBattle.board.getObjective("Tscore").setDisplayName("Time  finished");
+							p.removeMetadata("TeamName", plugin);
+						}
 					}
 				}
 
@@ -881,6 +907,22 @@ public class FFCommandExecutor implements CommandExecutor {
 								+ "のリスポーン地点を\nX:" + locx + "\nY:" + locy
 								+ "\nZ:" + locz + "に設定しました。");
 						return true;
+					} // spawn
+
+					else if (args[1].equals("spect")) {
+						if (args.length != 2) {
+							player.sendMessage(FrozenFight.messagePrefix
+									+ "パラメータエラー");
+							return false;
+						}
+
+						config.set("Spectator.Height", locy);
+						plugin.saveConfig();
+						player.sendMessage(FrozenFight.messagePrefix
+								+ "観戦の最低高度を\nX:" + locx + "\nY:" + locy
+								+ "\nZ:" + locz + "にに設定しました。");
+
+						return true;
 					}
 
 				} else {
@@ -908,8 +950,8 @@ public class FFCommandExecutor implements CommandExecutor {
 								+ "プレイヤー名が入力されていません。");
 						return false;
 					}
-					if (!Arrays.asList(players).contains(
-							Bukkit.getPlayer(args[2]))) {
+					if (!Arrays.asList(plugin.getServer().getOnlinePlayers())
+							.contains(Bukkit.getPlayer(args[2]))) {
 						sender.sendMessage(FrozenFight.messagePrefix
 								+ "プレイヤーは存在しません。");
 						return false;
@@ -929,8 +971,8 @@ public class FFCommandExecutor implements CommandExecutor {
 								+ "プレイヤー名が入力されていません。");
 						return false;
 					}
-					if (!Arrays.asList(players).contains(
-							Bukkit.getPlayer(args[2]))) {
+					if (!Arrays.asList(plugin.getServer().getOnlinePlayers())
+							.contains(Bukkit.getPlayer(args[2]))) {
 						sender.sendMessage(FrozenFight.messagePrefix
 								+ "プレイヤーは存在しません。");
 						return false;
@@ -944,25 +986,7 @@ public class FFCommandExecutor implements CommandExecutor {
 								+ "をspectatorから削除できませんでした。");
 						return false;
 					}
-				} else if (args[1].equals("height")) {
-					if (args[2].equals(null)) {
-						sender.sendMessage(FrozenFight.messagePrefix
-								+ "パラメータエラー");
-						return false;
-					} else {
-						if (!isInteger(args[1])) {
-							sender.sendMessage(FrozenFight.messagePrefix
-									+ args[1] + "は整数にしてください。");
-							return false;
-						} else {
-							sender.sendMessage(FrozenFight.messagePrefix
-									+ "観戦の高さを" + args[1] + "に設定しました。");
-							config.set("Spectator.Height",
-									Integer.parseInt(args[1]));
-							plugin.saveConfig();
-							return true;
-						}
-					}
+
 				}
 			}
 
@@ -1065,7 +1089,7 @@ public class FFCommandExecutor implements CommandExecutor {
 					// configへ保存
 					teamNames.add(args[2]);
 					config.set("Team.Names", teamNames);
-					config.set(args[2] + ".Color", teamColor.toString());
+					config.set(args[2] + ".Color", teamColor.name());
 					config.set(args[2] + ".Armor", armor);
 					plugin.saveConfig();
 					sender.sendMessage(FrozenFight.messagePrefix + "チーム:"
@@ -1118,6 +1142,7 @@ public class FFCommandExecutor implements CommandExecutor {
 				plugin.reloadConfig();
 				sender.sendMessage(FrozenFight.messagePrefix
 						+ "コンフィグをリロードしました。");
+				return true;
 			} else {
 				sender.sendMessage(FrozenFight.messagePrefix
 						+ "定義されていないコマンドです。");

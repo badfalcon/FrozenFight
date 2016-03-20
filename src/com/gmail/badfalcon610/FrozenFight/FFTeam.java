@@ -40,7 +40,6 @@ public class FFTeam {
 				"Spectator.List");
 
 		Scoreboard board = FrozenFight.board;
-		player.setScoreboard(board);
 
 		if (!spectatorList.contains(player.getName())) {
 
